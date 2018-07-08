@@ -1,3 +1,6 @@
+<?php
+$helper = new Helper();
+?>
 <!-- #Footer -->
 <footer id="Footer" class="clearfix">
     <!-- .Our_clients_slider -->
@@ -7,47 +10,12 @@
                 <a href="#" class="slider_control slider_control_prev"></a>
                 <a href="#" class="slider_control slider_control_next"></a>
                 <div class="inside">
-                    <ul>
-                        <li>
-                            <div class="slide-wrapper">
-                                <a target="_blank" href="#1" title="Html"><img width="200" height="65" src="<?= URL; ?>public/upload/clients_1.png" class="scale-with-grid wp-post-image" alt="clients_1"/></a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="slide-wrapper">
-                                <a target="_blank" href="#2" title="Twitter"><img width="200" height="65" src="<?= URL; ?>public/upload/clients_2.png" class="scale-with-grid wp-post-image" alt="clients_2"/></a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="slide-wrapper">
-                                <img width="200" height="65" src="<?= URL; ?>public/upload/clients_3.png" class="scale-with-grid wp-post-image" alt="clients_3"/>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="slide-wrapper">
-                                <a target="_blank" href="#4" title="Behance"><img width="200" height="65" src="<?= URL; ?>public/upload/clients_4.png" class="scale-with-grid wp-post-image" alt="clients_4"/></a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="slide-wrapper">
-                                <a target="_blank" href="#5" title="WooCommerce"><img width="200" height="65" src="<?= URL; ?>public/upload/clients_5.png" class="scale-with-grid wp-post-image" alt="clients_5"/></a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="slide-wrapper">
-                                <a target="_blank" href="#7" title="Pinterest"><img width="200" height="65" src="<?= URL; ?>public/upload/clients_7.png" class="scale-with-grid wp-post-image" alt="clients_7"/></a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="slide-wrapper">
-                                <a target="_blank" href="#6" title="Youtube"><img width="200" height="65" src="<?= URL; ?>public/upload/clients_6.png" class="scale-with-grid wp-post-image" alt="clients_6"/></a>
-                            </div>
-                        </li>
-                    </ul>
+                    <?= $helper->cargarCertificacionesPie($this->idioma); ?>
                 </div>
             </div>
         </div>
     </div>
+    
 
     <div class="widgets_wrapper">
         <div class="container">
@@ -175,7 +143,6 @@
 <script type='text/javascript' src='<?= URL; ?>public/js/jquery.plugins.js'></script>
 <script type='text/javascript' src='<?= URL; ?>public/js/scripts.js'></script>
 <script type='text/javascript' src='<?= URL; ?>public/js/twitter.js'></script>
-
 
 
 <script type="text/javascript">
@@ -332,7 +299,6 @@
     });	/*ready*/
 
 </script>
-
 
 </body>
 </html>

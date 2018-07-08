@@ -54,32 +54,22 @@ $helper = new Helper();
         <link rel='stylesheet' href='<?= URL; ?>public/css/style-colors.css' type='text/css' media='all' />
         <link rel='stylesheet' href='<?= URL; ?>public/css/style-2.css' type='text/css' media='all' />
         <link rel="stylesheet" href="<?= URL; ?>public/css/custom.css" media="all" />
-
         <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Open+Sans%3A300%2C400%2C400italic%2C700&amp;ver=4.2.2' type='text/css' media='all' />
         <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Patua+One&amp;ver=4.2.2' type='text/css' media='all' />
-
-
-
         <!--[if lt IE 9]>
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
         <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://themes.muffingroup.com/rocco/wp-content/themes/rocco/css/ie8.css" />
         <![endif]-->
-
-
-
     </head>
-
     <!-- body -->
     <body class="page page-child page-template-default template-slider  sticky-header layout-full-width">
-
         <!-- #Wrapper -->
         <div id="Wrapper">
             <!-- .header_placeholder 4sticky  -->
             <div class="header_placeholder">
             </div>
-
             <!-- #Header -->
             <header id="Header">
                 <div class="container">
@@ -91,20 +81,7 @@ $helper = new Helper();
                                 <input type="submit" class="submit" value="" style="display:none;"/>
                             </form>
                             <!-- .social -->
-                            <div class="social">
-                                <ul>
-                                    <li class="facebook"><a target="_blank" href="https://www.facebook.com/" title="Facebook">F</a></li>
-                                    <li class="googleplus"><a target="_blank" href="https://plus.google.com/" title="Google+">G</a></li>
-                                    <li class="twitter"><a target="_blank" href="https://twitter.com/" title="Twitter">L</a></li>
-                                    <li class="vimeo"><a target="_blank" href="https://vimeo.com/" title="Vimeo">V</a></li>
-                                    <li class="youtube"><a target="_blank" href="http://www.youtube.com/" title="YouTube">X</a></li>
-                                    <li class="flickr"><a target="_blank" href="http://www.flickr.com/" title="Flickr">N</a></li>
-                                    <li class="linked_in"><a target="_blank" href="http://www.linkedin.com/" title="LinkedIn">I</a></li>
-                                    <li class="pinterest"><a target="_blank" href="https://pinterest.com/" title="Pinterest">:</a></li>
-                                    <li class="dribbble"><a target="_blank" href="http://dribbble.com/" title="Dribbble">D</a></li>
-                                    <li class="instagram"><a target="_blank" href="http://dribbble.com/" title="Dribbble"><i class="fa fa-instagram" aria-hidden="true"></i></a></li>
-                                </ul>
-                            </div>
+                            <?= $helper->cargarRedesSociales(); ?>
                             <div class="language">
                                 <a href="#"><i class="fa fa-globe"></i><?= $lngTxt; ?></a>
                                 <div class="language_select">

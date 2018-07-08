@@ -744,16 +744,119 @@ class Helper {
 
     public function cargarMenu($idioma) {
         $lng = $idioma;
-
         $sql = $this->db->select("SELECT id_padre, " . $lng . "_texto, controlador, metodo, funcion from menu where estado = 1 ORDER BY orden ASC");
         $menu = '<ul id="megaUber" class="megaMenu">';
+
+        $sqlProductos = $this->db->select("SELECT
+                                                                id,
+                                                                " . $lng . "_nombre as nombre
+                                                        FROM
+                                                                productos
+                                                        WHERE
+                                                                estado = 1
+                                                        ORDER BY
+                                                                orden ASC;");
+        #para el menu de certificaciones
+        $sqlCertificaciones = $this->db->select("SELECT
+                                                        id,
+                                                        " . $lng . "_menu as menu
+                                                FROM
+                                                        certificaciones
+                                                WHERE
+                                                        estado = 1
+                                                ORDER BY
+                                                        orden ASC");
+        #para el menu de logistica
+        $sqlLogistica = $this->db->select("SELECT
+                                                        id,
+                                                        " . $lng . "_menu as menu
+                                                FROM
+                                                        logistica
+                                                WHERE
+                                                        estado = 1
+                                                ORDER BY
+                                                        orden ASC");
         foreach ($sql as $item) {
             $controlador = str_replace('/', '', $item['controlador']);
-            $url = $this->urlInicio($lng) . $controlador;
-            $menu .= '  <li class="menu-item"><a href="' . $url . '"><span class="wpmega-link-title">' . utf8_encode($item[$lng . '_texto']) . '</span></a></li>';
+            $url = '#';
+            if ($controlador != 'products') {
+                $url = $this->urlInicio($lng) . $controlador;
+            }
+            $classSubMenu = '';
+            switch ($item['controlador']) {
+                case 'products':
+                    $classSubMenu = 'current-page-ancestor current-menu-ancestor current-menu-parent current-page-parent current_page_parent current_page_ancestor menu-item-has-children mega-with-sub ss-nav-menu-item-0 ss-nav-menu-item-depth-0 ss-nav-menu-reg um-flyout-align-center';
+                    break;
+                case 'certifications':
+                    $classSubMenu = 'current-page-ancestor current-menu-ancestor current-menu-parent current-page-parent current_page_parent current_page_ancestor menu-item-has-children mega-with-sub ss-nav-menu-item-0 ss-nav-menu-item-depth-0 ss-nav-menu-reg um-flyout-align-center';
+                    break;
+                case 'logistics':
+                    $classSubMenu = 'current-page-ancestor current-menu-ancestor current-menu-parent current-page-parent current_page_parent current_page_ancestor menu-item-has-children mega-with-sub ss-nav-menu-item-0 ss-nav-menu-item-depth-0 ss-nav-menu-reg um-flyout-align-center';
+                    break;
+            }
+            $menu .= '  <li class="menu-item ' . $classSubMenu . '"><a href="' . $url . '"><span class="wpmega-link-title">' . utf8_encode($item[$lng . '_texto']) . '</span></a>';
+            switch ($item['controlador']) {
+                case 'products':
+                    $menu .= '<ul class="sub-menu sub-menu-1">';
+                    foreach ($sqlProductos as $producto) {
+                        $menu .= '<li class="menu-item ss-nav-menu-item-depth-1"><a href="' . $this->urlInicio($lng) . 'products/product/' . $producto['id'] . '/' . $this->cleanUrl(utf8_encode($producto['nombre'])) . '"><span class="wpmega-link-title"> ' . utf8_encode($producto['nombre']) . '</span></a></li>';
+                    }
+                    $menu .= '</ul>';
+                    break;
+                case 'certifications':
+                    $menu .= '<ul class="sub-menu sub-menu-1">';
+                    foreach ($sqlCertificaciones as $certificacion) {
+                        $menu .= '<li class="menu-item ss-nav-menu-item-depth-1"><a href="' . $this->urlInicio($lng) . 'certifications/certification/' . $certificacion['id'] . '/' . $this->cleanUrl(utf8_encode($certificacion['menu'])) . '"><span class="wpmega-link-title"> ' . utf8_encode($certificacion['menu']) . '</span></a></li>';
+                    }
+                    $menu .= '</ul>';
+                    break;
+                case 'logistics':
+                    $menu .= '<ul class="sub-menu sub-menu-1">';
+                    foreach ($sqlLogistica as $logistica) {
+                        $menu .= '<li class="menu-item ss-nav-menu-item-depth-1"><a href="' . $this->urlInicio($lng) . 'logistics/logistic/' . $logistica['id'] . '/' . $this->cleanUrl(utf8_encode($logistica['menu'])) . '"><span class="wpmega-link-title"> ' . utf8_encode($logistica['menu']) . '</span></a></li>';
+                    }
+                    $menu .= '</ul>';
+                    break;
+            }
+            $menu .= '</li>';
         }
         $menu .= '   </ul>';
         return $menu;
+    }
+
+    public function cargarRedesSociales() {
+        $sql = $this->db->select("SELECT descripcion, fontawesome, url FROM `redes` where estado = 1 ORDER BY orden ASC");
+        $div = '<div class="social">
+                    <ul>';
+        foreach ($sql as $item) {
+            $div .= '   <li class="' . strtolower(utf8_encode($item['descripcion'])) . '"><a target="_blank" href="' . $item['url'] . '" title="' . utf8_encode($item['descripcion']) . '"><i class="' . $item['fontawesome'] . ' redes-icon" aria-hidden="true"></i></a></li>';
+        }
+        $div .= '   </ul>
+                </div>';
+        return $div;
+    }
+
+    public function cargarCertificacionesPie($lng) {
+        $sql = $this->db->select("SELECT
+                                        id,
+                                        " . $lng . "_menu as menu,
+                                        img_certificacion
+                                FROM
+                                        certificaciones
+                                WHERE
+                                        estado = 1
+                                ORDER BY
+                                        orden ASC");
+        $li = '<ul>';
+        foreach ($sql as $item) {
+            $li .= '<li>
+                        <div class="slide-wrapper">
+                            <a href="' . $this->urlInicio($lng) . 'certifications/certification/' . $item['id'] . '/' . $this->cleanUrl(utf8_encode($item['menu'])) . '" title="' . utf8_encode($item['menu']) . '"><img width="200" height="65" src="' . URL . 'public/images/certificaciones/' . utf8_encode($item['img_certificacion']) . '" class="scale-with-grid wp-post-image img-footer-certification" alt="' . utf8_encode($item['menu']) . '"/></a>
+                        </div>
+                    </li>';
+        }
+        $li .= '</ul>';
+        return $li;
     }
 
 }

@@ -79,6 +79,7 @@
     margin-top: 10px;
     text-align: center;
     width: 25%;
+    height: 185px;
 }
 
 .fontawesome-icon-list .fa-hover {
@@ -100,3 +101,5 @@
 .font-bold{ font-weight: bold;}
 .redes-icon{font-size: 16px; position: relative; top: -1px;}
 .marginSection60{ margin: 60px 0;}
+.padding-text { padding-left: 75px;}
+.img-footer-certification{ width: 50%;}
