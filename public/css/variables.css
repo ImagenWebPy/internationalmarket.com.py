@@ -1,0 +1,127 @@
+/********************** Backgrounds **********************/
+ 
+	@media only screen and (min-width: 768px) and (max-width: 959px) {
+		#Header #menu {
+			background: #fff;
+		}
+	}
+	
+/************************ Colors *************************/	
+	
+/* Selections */
+	*::-moz-selection {
+		color: #fff;
+	}
+	*::selection {
+		color: #fff;		
+	}
+	
+/* Breadcrumbs */	
+	#Breadcrumbs ul.breadcrumbs li,
+	#Breadcrumbs ul.breadcrumbs li.home a { 
+		color: #c8cccf;
+	}
+	
+/* Faq & Accordion & Tabs */
+	.ui-tabs .ui-tabs-nav li {
+		border-right: 1px solid #fff;
+	}
+	
+/* Reply button */
+	#comments .commentlist > li .reply a.comment-reply-link {
+		background-color: #C5C9CB;
+		color: #fff !important;
+	}
+		
+/* Inputs */
+	input[type="text"], input[type="tel"], input[type="password"], input[type="email"], textarea, select {
+		background: #FdFdFd;
+		color: #8E989A;
+		border-color: #EBEFF2;
+	}
+	input[type="text"]:focus, input[type="tel"]:focus, input[type="password"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
+		border-color: #96CCED;
+		background: #E9F5FC !important;
+		color: #1477B4;
+	}
+
+/* Team */
+	.team .links a.link {
+		background: #fff;
+		color: #565A62 !important;
+	}
+	.team .links a:hover.link {
+		background: #bac4c5;
+		color: #F8F8F8 !important;
+	}
+
+/* Portfolio */
+	.Projects_header .categories ul li a {
+		color: #636262;
+		background: #F8F8F8;
+	}
+
+/* Widgets */
+	.widgets_wrapper .Recent_comments ul li, .widgets_wrapper .quick_facts ul li, .widgets_wrapper .widget_calendar td, .widgets_wrapper .widget_calendar th, .widgets_wrapper .Recent_comments ul li,
+	.widgets_wrapper .Recent_posts ul li, .widgets_wrapper .widget ul.menu li a, .widgets_wrapper .widget_categories li, .widgets_wrapper .widget_meta li a,
+	.widgets_wrapper .widget_tp_widget_recent_tweets ul li { 
+		border-color: rgba(255,255,255, 0.10) !important;
+	}
+	/* Menu hover */
+	.widgets_wrapper .widget ul.menu li.current_page_item a, .widgets_wrapper .widget ul.menu li a:hover,
+	.widgets_wrapper .widget_categories li:hover, .widgets_wrapper .widget_meta li a:hover { 
+		background: rgba(255, 255, 255, 0.05) !important;
+	}
+	
+/* Portfolio */
+	.Projects_header .categories ul li.current-cat a {
+		color: #fff;
+	}
+	.da-thumbs li .title h6 {
+		color: #34495E;
+	}
+	
+/* Get in touch */
+	.get_in_touch ul li i {
+		color: #aeb8c1;
+	}
+	
+/* Pricing box */
+	.pricing-box .plan-header .price {
+		color: #5B5B5B;
+	}
+	.pricing-box {
+		border-color: #F4F4F4;
+	}
+	
+/* Image overlays */
+	.wp-caption .photo .photo_wrapper a i, .gallery .gallery-item .gallery-icon i, .da-thumbs li a div span {
+		color: #fff;
+	}
+	
+/* widget_archive  */
+	.widget-area .widget_archive {
+		background: #F5F5F5;
+	}
+	.widget-area .widget_archive h3,
+	.widget-area .widget_archive li a  {
+		color: #384E65;
+	}
+	.widget-area .widget_archive li a:hover {
+		color: #112030;
+	}
+
+/********************** Responsive **********************/
+
+@media only screen and (max-width: 959px) {
+	#Header .responsive-menu-toggle { 
+		background:#eff1f2;
+		color: #5b6977;
+	}
+	#Header #menu > ul > li.current-menu-item > a,
+	#Header #menu > ul > li.current_page_item > a,
+	#Header #menu > ul > li.current-menu-ancestor > a,
+	#Header #menu > ul > li.current_page_ancestor > a {
+		background: rgba(0,0,0,.02);
+	}
+}	
