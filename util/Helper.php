@@ -779,7 +779,7 @@ class Helper {
         foreach ($sql as $item) {
             $controlador = str_replace('/', '', $item['controlador']);
             $url = '#';
-            if ($controlador != 'products') {
+            if (($controlador != 'products') && ($controlador != 'certifications') && ($controlador != 'logistics')) {
                 $url = $this->urlInicio($lng) . $controlador;
             }
             $classSubMenu = '';
