@@ -15,12 +15,12 @@ $helper = new Helper();
             </div>
         </div>
     </div>
-    
+
 
     <div class="widgets_wrapper">
         <div class="container">
 
-            <div class="one-fourth column">
+            <div class="one-second column">
                 <aside id="text-2" class="widget widget_text">
                     <h4>About us</h4>
                     <div class="textwidget">
@@ -33,7 +33,7 @@ $helper = new Helper();
                 </aside>
             </div>
 
-            <div class="one-fourth column">
+            <div class="one-second column">
                 <aside id="widget_mfn_recent_comments-2" class="widget widget_mfn_recent_comments">
                     <h4>Recent comments</h4>
                     <div class="Recent_comments">
@@ -66,27 +66,6 @@ $helper = new Helper();
                     </div>
                 </aside>
             </div>
-
-            <div class="one-fourth column">
-                <aside id="widget_mfn_quick_facts-2" class="widget widget_mfn_quick_facts">
-                    <h4>Quick facts</h4>
-                    <div class="quick_facts">
-                        <ul>
-                            <li><span><i class="fa fa-user"></i>12</span>people work for us</li>
-                            <li><span><i class="fa fa-coffee"></i>52</span>drank gallons of coffee</li>
-                            <li><span><i class="fa fa-align-left"></i>74</span>thousand lines of code</li>
-                            <li><span><i class="fa fa-calendar"></i>03</span>years on Themeforest</li>
-                            <li><span><i class="fa fa-clock-o"></i>24</span>hours outstanding support</li>
-                        </ul>
-                    </div>
-                </aside>
-            </div>
-            <div class="one-fourth column">
-                <aside id="tp_widget_recent_tweets-2" class="widget widget_tp_widget_recent_tweets">
-                    <h4>Recent Tweets</h4>
-                    <div id="example2"></div>
-                </aside>
-            </div>
         </div>
     </div>
 
@@ -94,21 +73,10 @@ $helper = new Helper();
         <div class="container">
             <div class="column one">
                 <p>
-                    <span class="copy">&copy; 2015 <strong>Rocco HTML Theme</strong>. All Rights Reserved.</span>
-                    <span class="author">Powered by <a target="_blank" rel="nofollow" href="#">HTML</a>. Created by <a target="_blank" rel="nofollow" href="http://themeforest.net/user/max-themes">Max Themes</a>.</span>
+                    <span class="author">Powered by <a target="_blank" rel="nofollow" href="https://imagenwebhq.com"><img class="iwebLogo" src="<?= URL; ?>public/images/iweb-logo.png" alt="ImagenWeb"></a></span>
                 </p>
                 <div class="social">
-                    <ul>
-                        <li class="facebook"><a target="_blank" href="https://www.facebook.com/" title="Facebook">F</a></li>
-                        <li class="googleplus"><a target="_blank" href="https://plus.google.com/" title="Google+">G</a></li>
-                        <li class="twitter"><a target="_blank" href="https://twitter.com/" title="Twitter">L</a></li>
-                        <li class="vimeo"><a target="_blank" href="https://vimeo.com/" title="Vimeo">V</a></li>
-                        <li class="youtube"><a target="_blank" href="http://www.youtube.com/" title="YouTube">X</a></li>
-                        <li class="flickr"><a target="_blank" href="http://www.flickr.com/" title="Flickr">N</a></li>
-                        <li class="linked_in"><a target="_blank" href="http://www.linkedin.com/" title="LinkedIn">I</a></li>
-                        <li class="pinterest"><a target="_blank" href="https://pinterest.com/" title="Pinterest">:</a></li>
-                        <li class="dribbble"><a target="_blank" href="http://dribbble.com/" title="Dribbble">D</a></li>
-                    </ul>
+                    <?= $helper->cargarRedesSociales(); ?>
                 </div>
             </div>
         </div>

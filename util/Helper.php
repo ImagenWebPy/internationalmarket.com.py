@@ -780,7 +780,11 @@ class Helper {
             $controlador = str_replace('/', '', $item['controlador']);
             $url = '#';
             if (($controlador != 'products') && ($controlador != 'certifications') && ($controlador != 'logistics')) {
-                $url = $this->urlInicio($lng) . $controlador;
+                $metodo = '';
+                if ($item['metodo'] != 'index') {
+                    $metodo = $item['metodo'] . '/';
+                }
+                $url = $this->urlInicio($lng) . $controlador . '/' . $metodo;
             }
             $classSubMenu = '';
             switch ($item['controlador']) {
@@ -857,6 +861,27 @@ class Helper {
         }
         $li .= '</ul>';
         return $li;
+    }
+
+    public function getMetaTags($lng, $controlador) {
+        $data = array();
+        if (!empty($controlador[1])) {
+            $controller = $controlador[1];
+        } else {
+            $controller = '/';
+        }
+        $sql = $this->db->select("SELECT mt." . $lng . "_descripcion as description,
+                                        mt." . $lng . "_keywords as keywords,
+                                        mt." . $lng . "_title as title
+                                FROM menu m
+                                LEFT JOIN meta_tags mt on mt.id_menu = m.id
+                                where m.controlador = '" . $controller . "'");
+        $data = array(
+            'description' => utf8_encode($sql[0]['description']),
+            'keywords' => utf8_encode($sql[0]['keywords']),
+            'title' => utf8_encode($sql[0]['title'])
+        );
+        return $data;
     }
 
 }
