@@ -1,7 +1,7 @@
-<div id="Subheader" style="background-image:url(<?= URL; ?>public/upload/background_2.jpg); background-repeat:no-repeat; background-position:center; background-attachment:fixed; -webkit-background-size:cover; background-size:cover">
+<div id="Subheader" style="background-image:url(<?= URL; ?>public/upload/<?= $this->contacto['imagen_header']; ?>); background-repeat:no-repeat; background-position:center; background-attachment:fixed; -webkit-background-size:cover; background-size:cover">
     <div class="container">
         <div class="column one">
-            <h1 class="title"><?= $this->subHeader; ?></h1>
+            <h1 class="title"><?= utf8_encode($this->subHeader); ?></h1>
         </div>
     </div>
 </div>
@@ -16,14 +16,14 @@
                     <div class="items_group clearfix">
                         <div class="column one column">
                             <div style="text-align: center;">
-                                <h2>Por favor completa el formulario para ponerte en contacto con nosotros.</h2>
+                                <h2><?= utf8_encode($this->contacto['titulo']); ?></h2>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="section dark" style="padding:20px 0 0px; background-image:url(<?= URL; ?>public/upload/background_3.jpg); background-repeat:no-repeat; background-position:center; background-attachment:fixed; -webkit-background-size:cover; background-size:cover">
+            <div class="section dark" style="padding:20px 0 0px; background-image:url(<?= URL; ?>public/images/parallax/<?= $this->contacto['imagen_parallax']; ?>); background-repeat:no-repeat; background-position:center; background-attachment:fixed; -webkit-background-size:cover; background-size:cover">
                 <div class="section_wrapper clearfix">
                     <div class="items_group clearfix">
                         <div class="column one-third column" style="margin-top: 20px;">
@@ -33,21 +33,21 @@
                                 <form id="contact-form" class="contact">
                                     <p>
                                         <span class="wpcf7-form-control-wrap name">
-                                            <input type="text"  name="name" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Your name"/>
+                                            <input type="text"  name="name" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_nombre']); ?>"/>
                                         </span>
 
                                         <span class="wpcf7-form-control-wrap email">
-                                            <input type="text" name="mail" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-email wpcf7-validates-as-required wpcf7-validates-as-email" aria-required="true" aria-invalid="false" placeholder="Your email"/>
+                                            <input type="text" name="mail" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-email wpcf7-validates-as-required wpcf7-validates-as-email" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_email']); ?>"/>
                                         </span>
 
                                         <span class="wpcf7-form-control-wrap subject">
-                                            <input type="text" name="website" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Subject"/>
+                                            <input type="text" name="website" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_asunto']); ?>"/>
                                         </span>
 
                                         <span class="wpcf7-form-control-wrap message">
-                                            <textarea  name="comment" id="comment" cols="40" rows="6" class="wpcf7-form-control wpcf7-textarea wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Message"></textarea>
+                                            <textarea  name="comment" id="comment" cols="40" rows="6" class="wpcf7-form-control wpcf7-textarea wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_mensaje']); ?>"></textarea>
                                         </span>
-                                        <input type="submit" id="submit_contact" value="Send message" class="wpcf7-form-control wpcf7-submit"/>
+                                        <input type="submit" id="submit_contact" value="<?= utf8_encode($this->contacto['btn_enviar']); ?>" class="wpcf7-form-control wpcf7-submit"/>
                                     <div id="msg" class="message"></div>
                                     <p></p>
                                 </form>
@@ -62,24 +62,18 @@
                                     <ul>
                                         <li class="address"><i class="fa fa-map-marker"></i>
                                             <p>
-                                                Envato<br/>
-                                                Level 13, 2 Elizabeth St, Melbourne<br/>
-                                                Victoria 3000 Australia
+                                                <?= utf8_encode($this->direcciones['direccion']); ?><br>
+                                                <?= utf8_encode($this->direcciones['ciudad']) . ' - ' . utf8_encode($this->direcciones['pais']); ?>
                                             </p>
                                         </li>
                                         <li class="phone"><i class="fa fa-phone"></i>
                                             <p>
-                                                +61 (0) 3 8376 6284
+                                                <?= utf8_encode($this->direcciones['telefono']); ?>
                                             </p>
                                         </li>
                                         <li class="mail"><i class="fa fa-envelope"></i>
                                             <p>
-                                                <a href="mailto:noreply@envato.com">noreply@envato.com</a>
-                                            </p>
-                                        </li>
-                                        <li class="www"><i class="fa fa-globe"></i>
-                                            <p>
-                                                <a href="http://www.envato.com/">www.envato.com</a>
+                                                <a href="mailto:<?= utf8_encode($this->direcciones['email']); ?>"><?= utf8_encode($this->direcciones['email']); ?></a>
                                             </p>
                                         </li>
                                     </ul>
@@ -94,7 +88,7 @@
                     <div class="items_group clearfix">
                         <div class="column one column">
                             <div style="text-align: center;">
-                                <h2>Our location</h2>
+                                <h2><?= utf8_encode($this->contacto['texto_ubicacion']); ?></h2>
                             </div>
                         </div>
                         <div class="column one map">
@@ -113,10 +107,10 @@
 // Initialize and add the map
     function initMap() {
         // The location of Uluru
-        var uluru = {lat: -25.236736, lng: -57.536458};
+        var uluru = {lat: <?= utf8_encode($this->direcciones['latitud']); ?>, lng: <?= utf8_encode($this->direcciones['longitud']); ?>};
         // The map, centered at Uluru
         var map = new google.maps.Map(
-                document.getElementById('google-map-area'), {zoom: 17, center: uluru});
+                document.getElementById('google-map-area'), {zoom: <?= utf8_encode($this->direcciones['zoom']); ?>, center: uluru});
         // The marker, positioned at Uluru
         var marker = new google.maps.Marker({position: uluru, map: map});
     }

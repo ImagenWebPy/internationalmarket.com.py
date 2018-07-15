@@ -15,11 +15,8 @@ $helper = new Helper();
             </div>
         </div>
     </div>
-
-
     <div class="widgets_wrapper">
         <div class="container">
-
             <div class="one-second column">
                 <aside id="text-2" class="widget widget_text">
                     <h4>About us</h4>
@@ -32,7 +29,6 @@ $helper = new Helper();
                     </div>
                 </aside>
             </div>
-
             <div class="one-second column">
                 <aside id="widget_mfn_recent_comments-2" class="widget widget_mfn_recent_comments">
                     <h4>Recent comments</h4>

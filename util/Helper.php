@@ -884,4 +884,129 @@ class Helper {
         return $data;
     }
 
+    public function footer_content($lng) {
+        $aboutus = $this->db->select("");
+    }
+
+    public function getDirecciones() {
+        $sql = $this->db->select("SELECT
+                                        direccion,
+                                        ciudad,
+                                        pais,
+                                        telefono,
+                                        email,
+                                        latitud,
+                                        longitud,
+                                        zoom,
+                                        mappin
+                                FROM
+                                        datos_contacto
+                                WHERE
+                                        id = 1");
+        return $sql[0];
+    }
+
+    public function cargarSlider($lng) {
+        $sql = $this->db->select("SELECT
+                                        imagen,
+                                        " . $lng . "_texto1 as texto1,
+                                        " . $lng . "_texto2 as texto2,
+                                        " . $lng . "_boton as boton,
+                                        data_x_1,
+                                        data_x_2,
+                                        data_y_1,
+                                        data_y_2,
+                                        data_speed_1,
+                                        data_speed_2,
+                                        data_start_1,
+                                        data_start_2,
+                                        boton_x,
+                                        boton_y,
+                                        boton_speed,
+                                        boton_start,
+                                        url
+                                FROM
+                                        slider
+                                WHERE
+                                        estado = 1
+                                ORDER BY
+                                        orden ASC");
+        return $sql;
+    }
+
+    public function cargarSeccion1($lng) {
+        $sql = $this->db->select("SELECT
+                                        " . $lng . "_titulo as titulo,
+                                        " . $lng . "_contenido as contenido,
+                                        estado
+                                FROM
+                                        index_seccion1
+                                WHERE
+                                        id = 1
+                                AND estado = 1");
+        return (!empty($sql)) ? $sql[0] : NULL;
+    }
+
+    public function cargarSeccion2($lng) {
+        $sql = $this->db->select("SELECT
+                                        imagen,
+                                        " . $lng . "_contenido as contenido,
+                                        " . $lng . "_boton as boton,
+                                        url
+                                FROM
+                                        index_seccion2
+                                WHERE
+                                        id = 1
+                                AND estado = 1");
+        return (!empty($sql)) ? $sql[0] : NULL;
+    }
+
+    public function cargarSeccion3($lng) {
+        $sql = $this->db->select("SELECT
+                                        " . $lng . "_titulo as titulo,
+                                        " . $lng . "_contenido as contenido,
+                                        imagen
+                                FROM
+                                        index_seccion3
+                                WHERE
+                                        id = 1
+                                AND estado = 1");
+        return (!empty($sql)) ? $sql[0] : NULL;
+    }
+
+    public function cargarSeccion4($lng) {
+        $sql = $this->db->select("SELECT
+                                        " . $lng . "_titulo as titulo,
+                                        " . $lng . "_contendio as contenido,
+                                        id_video_yuotube as video
+                                FROM
+                                        index_seccion4
+                                WHERE
+                                        id = 1
+                                AND estado = 1");
+        return (!empty($sql)) ? $sql[0] : NULL;
+    }
+
+    public function cargarSeccion5($lng) {
+        $sql = $this->db->select("SELECT
+                                        " . $lng . "_titulo as titulo,
+                                        imagen
+                                FROM
+                                        index_seccion5
+                                WHERE
+                                        id = 1
+                                AND estado = 1");
+        return (!empty($sql)) ? $sql[0] : NULL;
+    }
+
+    public function cargarSeccion5_items($lng) {
+        $sql = $this->db->select("SELECT
+                                        " . $lng . "_item as item
+                                FROM
+                                        index_seccion5_items
+                                WHERE
+                                        estado = 1");
+        return (!empty($sql)) ? $sql : NULL;
+    }
+
 }
