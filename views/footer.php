@@ -1,5 +1,6 @@
 <?php
 $helper = new Helper();
+$footer = $helper->footer_content($this->idioma);
 ?>
 <!-- #Footer -->
 <footer id="Footer" class="clearfix">
@@ -19,45 +20,24 @@ $helper = new Helper();
         <div class="container">
             <div class="one-second column">
                 <aside id="text-2" class="widget widget_text">
-                    <h4>About us</h4>
+                    <h4><?= $footer['titulo_nosotros']; ?></h4>
                     <div class="textwidget">
-                        <h6>We really love working for you and your customers</h6>
-                        <p>
-                            We are Muffin Group and we do awesome themes. We do what we love and this is the best in our life. Try a piece of our work and you will not want to swap for anything else!
-                        </p>
-                        <a href="#">Read more &rarr;</a>
+                        <p><?= $footer['nosotros']; ?>...</p>
                     </div>
                 </aside>
             </div>
             <div class="one-second column">
                 <aside id="widget_mfn_recent_comments-2" class="widget widget_mfn_recent_comments">
-                    <h4>Recent comments</h4>
+                    <h4><?= $footer['titulo_blog']; ?></h4>
                     <div class="Recent_comments">
                         <ul>
-                            <li>
-                                <div class="text">
-                                    <p>
-                                        "There are many variations of passages of Lorem Ipsum available, but the majority have [...]"
-                                    </p>
-                                    <div class="arrow">
+                            <?php foreach ($footer['entradas'] as $item): ?>
+                                <li>
+                                    <div class="text">
+                                        <a href="<?= $helper->armaUrl($item['id'], 'blog', $this->idioma . '_titulo', $this->idioma); ?>" style="color: #fff;"><?= utf8_encode($item['titulo']); ?></a>
                                     </div>
-                                </div>
-                                <p class="author">
-                                    Don Papa, <a href="#" title="Don Papa | Revolution Slider left sidebar">Revolution Slider left sidebar</a>
-                                </p>
-                            </li>
-                            <li>
-                                <div class="text">
-                                    <p>
-                                        "It is a long established fact that a reader will be distracted by the [...]"
-                                    </p>
-                                    <div class="arrow">
-                                    </div>
-                                </div>
-                                <p class="author">
-                                    Doris, <a href="#" title="Doris | Vimeo &#038; YouTube video post">Vimeo &#038; YouTube video post</a>
-                                </p>
-                            </li>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
                     </div>
                 </aside>

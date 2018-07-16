@@ -885,7 +885,26 @@ class Helper {
     }
 
     public function footer_content($lng) {
-        $aboutus = $this->db->select("");
+        $textoMenuNosotros = $this->db->select("select " . $lng . "_texto as texto from menu where id = 2");
+        $aboutus = $this->db->select("SELECT " . $lng . "_contenido as contenido FROM nosotros where id = 1;");
+        $textoFooter = $this->db->select("SELECT " . $lng . "_footer as texto from blog_header where id = 1");
+        $ultimasEntradas = $this->db->select("SELECT
+                                                    id,
+                                                    " . $lng . "_titulo as titulo
+                                            FROM
+                                                    blog
+                                            WHERE
+                                                    estado = 1
+                                            ORDER BY
+                                                    fecha_blog DESC
+                                            LIMIT 3");
+        $data = array(
+            'titulo_nosotros' => utf8_encode($textoMenuNosotros[0]['texto']),
+            'nosotros' => substr(strip_tags(utf8_encode($aboutus[0]['contenido'])), 0, 300),
+            'titulo_blog' => utf8_encode($textoFooter[0]['texto']),
+            'entradas' => $ultimasEntradas
+        );
+        return $data;
     }
 
     public function getDirecciones() {
