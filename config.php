@@ -27,6 +27,7 @@ define('HASH_PASSWORD_KEY', '!@123456789ABCDEFGHIJKLMNOPRSTWYZ[¿]{?}<->::abcdef
 
 //Constantes varias
 define('SITE_TITLE', 'International Market - ');
+define('TITLE', 'Administrador IM - ');
 define('CANT_REG', 12);
 
 function getHost() {

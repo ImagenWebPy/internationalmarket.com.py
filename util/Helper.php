@@ -1035,4 +1035,21 @@ class Helper {
         return $url;
     }
 
+    public function getActivePageAdmin($page) {
+        $dashboard = $dashboard = '';
+        switch ($page) {
+            case'inicio':
+                $inicio = 'class ="active"';
+                break;
+
+            default :
+                $dashboard = 'class ="active"';
+                break;
+        }
+    }
+
+    public function retornarIdioma() {
+        return $this->idioma;
+    }
+
 }
