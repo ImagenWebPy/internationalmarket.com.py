@@ -1,6 +1,6 @@
 <div class="footer">
     <div class="pull-right">
-        Desarrollo <a href="https://imagenwebhq.com" target="_blank"><img class="logoIweb" src="<?= URL; ?>/public/admin/img/logo-iweb.png" alt="Imagen Web"></a>
+        <!--Desarrollo <a href="https://imagenwebhq.com" target="_blank"><img class="logoIweb" src="<?= URL; ?>/public/admin/img/logo-iweb.png" alt="Imagen Web"></a>-->
     </div>
 </div>
 </div>

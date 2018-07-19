@@ -46,6 +46,21 @@ class Admin extends Controller {
             unset($_SESSION['message']);
     }
 
+    public function usuarios() {
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Usuarios';
+        #cargamos las librerias extras
+        $this->view->helper = new Helper();
+        $this->view->public_css = array("css/plugins/dataTables/datatables.min.css", "css/plugins/html5fileupload/html5fileupload.css", "css/plugins/iCheck/custom.css", "css/plugins/summernote/summernote.css", "css/plugins/html5fileupload/html5fileupload.css", "css/plugins/toastr/toastr.min.css", "css/plugins/datapicker/datepicker3.css");
+        $this->view->public_js = array("js/plugins/dataTables/datatables.min.js", "js/plugins/dataTables/dataTables.rowReorder.min.js", "js/plugins/iCheck/icheck.min.js", "js/plugins/pdfobject/pdfobject.min.js", "js/plugins/toastr/toastr.min.js", "js/plugins/datapicker/bootstrap-datepicker.js", "js/plugins/input-mask/jquery.inputmask.js", "js/plugins/input-mask/jquery.inputmask.numeric.extensions.js", "js/plugins/datapicker/locales/bootstrap-datepicker.es.min.js");
+        $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/usuarios/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
+
     public function modalEditarRedes() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
@@ -95,6 +110,35 @@ class Admin extends Controller {
             'zoom' => $this->helper->cleanInput($_POST['zoom']),
         );
         $data = $this->model->frmEditarDirecciones($datos);
+        echo json_encode($data);
+    }
+
+    public function listadoDTUsuarios() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = $this->model->listadoDTUsuarios();
+        echo $data;
+    }
+
+    public function modalEditarDTUsuario() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->modalEditarDTUsuario($data);
+        echo $datos;
+    }
+
+    public function frmEditarUsuario() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'nombre' => $this->helper->cleanInput($_POST['nombre']),
+            'email' => $this->helper->cleanInput($_POST['email']),
+            'id_usuario_rol' => $this->helper->cleanInput($_POST['id_usuario_rol']),
+            'contrasena' => (!empty($_POST['contrasena'])) ? $this->helper->cleanInput($_POST['contrasena']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0
+        );
+        $data = $this->model->frmEditarUsuario($datos);
         echo json_encode($data);
     }
 

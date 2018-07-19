@@ -102,10 +102,10 @@ class Admin_Model extends Model {
         //$sql = $this->db->select("SELECT * FROM $tabla WHERE id = $id;");
         $data = '';
         switch ($tabla) {
-            case 'admin_usuario':
+            case 'usuario':
                 $sql = $this->db->select("SELECT wa.nombre, wa.email, wr.descripcion as rol, wa.estado
-                                        FROM admin_usuario wa
-                                        LEFT JOIN admin_rol wr on wr.id = wa.id_rol WHERE wa.id = $id;");
+                                        FROM usuario wa
+                                        LEFT JOIN usuario_rol wr on wr.id = wa.id_usuario_rol WHERE wa.id = $id;");
                 break;
             case 'ciudad':
                 $sql = $this->db->select("SELECT c.id, c.descripcion as ciudad, c.estado, d.descripcion as departamento FROM ciudad c
@@ -182,9 +182,9 @@ class Admin_Model extends Model {
                 break;
             case 'usuarios':
                 if ($sql[0]['estado'] == 1) {
-                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="usuarios" data-rowid="usuarios_" data-tabla="admin_usuario" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="usuarios" data-rowid="usuarios_" data-tabla="usuario" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
                 } else {
-                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="usuarios" data-rowid="usuarios_" data-tabla="admin_usuario" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="usuarios" data-rowid="usuarios_" data-tabla="usuario" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
                 }
                 $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTUsuario"><i class="fa fa-edit"></i> Editar </a>';
                 $data = '<td>' . utf8_encode($sql[0]['nombre']) . '</td>'
@@ -259,6 +259,140 @@ class Admin_Model extends Model {
         $data = array(
             'type' => 'success',
             'content' => 'Se han actualizado correctamente los datos de contacto',
+            'id' => $id
+        );
+        return $data;
+    }
+
+    public function listadoDTUsuarios() {
+        $sql = $this->db->select("SELECT wa.id, wa.nombre, wa.email, wr.descripcion as rol, wa.estado
+                                FROM usuario wa
+                                LEFT JOIN usuario_rol wr on wr.id = wa.id_usuario_rol");
+        $datos = array();
+        foreach ($sql as $item) {
+            $id = $item['id'];
+            if ($item['estado'] == 1) {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="usuarios" data-rowid="usuarios_" data-tabla="usuario" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+            } else {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="usuarios" data-rowid="usuarios_" data-tabla="usuario" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+            }
+            $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTUsuario"><i class="fa fa-edit"></i> Editar </a>';
+            array_push($datos, array(
+                "DT_RowId" => "usuarios_$id",
+                'nombre' => utf8_encode($item['nombre']),
+                'email' => utf8_encode($item['email']),
+                'rol' => utf8_encode($item['rol']),
+                'estado' => $estado,
+                'accion' => $btnEditar
+            ));
+        }
+        $json = '{"data": ' . json_encode($datos) . '}';
+        return $json;
+    }
+
+    public function modalEditarDTUsuario($datos) {
+        $id = $datos['id'];
+        $sql = $this->db->select("SELECT wa.nombre, wa.email, wr.descripcion as rol, wa.estado, wr.id as id_rol
+                                FROM usuario wa
+                                LEFT JOIN usuario_rol wr on wr.id = wa.id_usuario_rol where wa.id = $id");
+        $sqlRoles = $this->db->select("select * from usuario_rol where estado = 1");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarUsuario" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre</label>
+                                    <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="' . utf8_encode($sql[0]['nombre']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="text" name="email" class="form-control" placeholder="Email" value="' . utf8_encode($sql[0]['email']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Rol</label>
+                                    <select class="form-control m-b" name="id_usuario_rol" required> 
+                                        <option value="">Seleccione un Rol</option>';
+        foreach ($sqlRoles as $item) {
+            $selected = ($item['id'] == $sql[0]['id_rol']) ? 'selected' : '';
+            $modal .= '                 <option value="' . $item['id'] . '" ' . $selected . '>' . $item['descripcion'] . '</option>';
+        }
+        $modal .= '                </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                            </div>
+                            <hr>
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    Solamente complete el campo contraseña cuando desee modificar la misma. Si la deja vacia no se modificará.
+                                </div>
+                                <div class="form-group">
+                                    <label>Contraseña</label>
+                                    <input type="text" name="contrasena" class="form-control" placeholder="Contraseña" value="">
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Usuario</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Editar Datos del Usuario',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function frmEditarUsuario($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $contrasena = $datos['contrasena'];
+        if (!empty($contrasena)) {
+            $update = array(
+                'nombre' => utf8_decode($datos['nombre']),
+                'email' => utf8_decode($datos['email']),
+                'id_usuario_rol' => utf8_decode($datos['id_usuario_rol']),
+                'contrasena' => Hash::create('sha256', $contrasena, HASH_PASSWORD_KEY),
+                'estado' => $estado
+            );
+        } else {
+            $update = array(
+                'nombre' => utf8_decode($datos['nombre']),
+                'email' => utf8_decode($datos['email']),
+                'id_usuario_rol' => utf8_decode($datos['id_usuario_rol']),
+                'estado' => $estado
+            );
+        }
+        $this->db->update('admin_usuario', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => $this->rowDataTable('usuarios', 'admin_usuario', $id),
+            'message' => 'Se han Actualizado correctamente los datos del usuario ' . utf8_decode($datos['nombre']),
             'id' => $id
         );
         return $data;
