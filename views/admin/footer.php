@@ -64,7 +64,7 @@ if (isset($this->js)) {
                 var id = $(this).attr("data-id");
                 var url = $(this).attr("data-url");
                 $.ajax({
-                    url: "<?= URL; ?>admin/" + url,
+                    url: "<?= URL . $this->idioma; ?>/admin/" + url,
                     type: "POST",
                     data: {id: id},
                     dataType: "json"
@@ -75,9 +75,6 @@ if (isset($this->js)) {
                     $(".genericModal .modal-title").html(data.titulo);
                     $(".genericModal .modal-body").html(data.content);
                     $(".genericModal").modal("toggle");
-                    if (typeof data.id_paciente !== 'undefined') {
-                        getresult("<?= URL; ?>admin/getresult/" + data.id_paciente);
-                    }
                     $(".summernote").summernote({
                         height: 300, // set editor height
                         minHeight: null, // set minimum height of editor
@@ -109,7 +106,7 @@ if (isset($this->js)) {
                 var seccion = $(this).attr("data-seccion");
                 var rowid = $(this).attr("data-rowid");
                 $.ajax({
-                    url: "<?= URL; ?>admin/cambiarEstado",
+                    url: "<?= URL . $this->idioma; ?>/admin/cambiarEstado",
                     type: "POST",
                     data: {id: id, tabla: tabla, campo: campo, estado: estado, seccion: seccion},
                     dataType: "json"
@@ -124,7 +121,7 @@ if (isset($this->js)) {
             {
                 var url = $(this).attr("data-url");
                 $.ajax({
-                    url: "<?= URL; ?>admin/" + url,
+                    url: "<?= URL . $this->idioma; ?>/admin/" + url,
                     type: "POST",
                     dataType: "json"
                 }).done(function (data) {
