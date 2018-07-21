@@ -107,9 +107,13 @@ class Admin_Model extends Model {
                                         FROM usuario wa
                                         LEFT JOIN usuario_rol wr on wr.id = wa.id_usuario_rol WHERE wa.id = $id;");
                 break;
-            case 'ciudad':
-                $sql = $this->db->select("SELECT c.id, c.descripcion as ciudad, c.estado, d.descripcion as departamento FROM ciudad c
-                                        LEFT JOIN departamento d on c.id_departamento = d.id WHERE c.id = $id;");
+            case 'meta_tags':
+                $sql = $this->db->select("SELECT
+                                                m.es_texto,
+                                                en_texto
+                                        FROM
+                                                meta_tags mt
+                                        LEFT JOIN menu m ON m.id = mt.id_menu WHERE mt.id = $id;");
                 break;
             default :
                 $sql = $this->db->select("SELECT * FROM $tabla WHERE id = $id;");
@@ -206,10 +210,11 @@ class Admin_Model extends Model {
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
-            case 'metatags':
+            case 'meta_tags':
                 $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMetaTag"><i class="fa fa-edit"></i> Editar </a>';
                 $data = '<td>' . $id . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['pagina']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
         }
@@ -388,12 +393,257 @@ class Admin_Model extends Model {
                 'estado' => $estado
             );
         }
-        $this->db->update('admin_usuario', $update, "id = $id");
+        $this->db->update('usuario', $update, "id = $id");
         $data = array(
             'type' => 'success',
-            'content' => $this->rowDataTable('usuarios', 'admin_usuario', $id),
-            'message' => 'Se han Actualizado correctamente los datos del usuario ' . utf8_decode($datos['nombre']),
+            'content' => $this->rowDataTable('usuarios', 'usuario', $id),
+            'message' => 'Se han Actualizado correctamente los datos del usuario ' . $datos['nombre'],
             'id' => $id
+        );
+        return $data;
+    }
+
+    public function modalAgregarUsuario($lng) {
+        $sqlRoles = $this->db->select("select * from usuario_rol where estado = 1");
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarUsuario" method="POST">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre</label>
+                                    <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="text" name="email" class="form-control" placeholder="Email" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Rol</label>
+                                    <select class="form-control m-b" name="id_usuario_rol" required> 
+                                        <option value="">Seleccione un Rol</option>';
+        foreach ($sqlRoles as $item) {
+            $modal .= '                 <option value="' . $item['id'] . '">' . $item['descripcion'] . '</option>';
+        }
+        $modal .= '                </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Contraseña</label>
+                                    <input type="text" name="contrasena" class="form-control" placeholder="Contraseña" value="" required>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Usuario</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Agregar Usuario',
+            'content' => $modal
+        );
+        return $data;
+    }
+
+    public function frmAgregarUsuario($datos) {
+        $this->db->insert('usuario', array(
+            'id_usuario_rol' => utf8_decode($datos['id_usuario_rol']),
+            'email' => utf8_decode($datos['email']),
+            'contrasena' => Hash::create('sha256', utf8_decode($datos['contrasena']), HASH_PASSWORD_KEY),
+            'nombre' => utf8_decode($datos['nombre']),
+            'estado' => $datos['estado']
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
+    public function listadoDTMetas($datos) {
+        $columns = array(
+            0 => 'id',
+            1 => 'pagina',
+            2 => 'accion'
+        );
+        #getting total number records without any search
+        $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM meta_tags");
+        $totalFiltered = $sql[0]['cantidad'];
+        $totalData = $sql[0]['cantidad'];
+
+        $query = "SELECT mt.id, m.es_texto, m.en_texto FROM meta_tags mt 
+                 LEFT JOIN menu m on m.id = mt.id_menu  where 1 = 1";
+        $where = "";
+        if (!empty($datos['search']['value'])) {
+            $where .= " AND (m.es_texto LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR m.en_texto LIKE '%" . $requestData['search']['value'] . "%' )";
+            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+            $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM meta_tags mt 
+                                    LEFT JOIN menu m on m.id = mt.id_menu where 1 = 1 $where");
+            $totalFiltered = $sql[0]['cantidad'];
+        }
+        $query .= $where;
+        $query .= " ORDER BY " . $columns[$datos['order'][0]['column']] . "   " . $datos['order'][0]['dir'] . "  LIMIT " . $datos['start'] . " ," . $datos['length'] . "   ";
+        $sql = $this->db->select($query);
+        $data = array();
+        foreach ($sql as $row) {  // preparing an array
+            $id = $row["id"];
+            $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMetaTag"><i class="fa fa-edit"></i> Editar </a>';
+            $nestedData = array();
+            $nestedData['DT_RowId'] = 'metatag_' . $id;
+            $nestedData[] = $id;
+            $nestedData[] = utf8_encode($row["es_texto"]);
+            $nestedData[] = utf8_encode($row["en_texto"]);
+            $nestedData[] = $btnEditar;
+            $data[] = $nestedData;
+        }
+
+        $json_data = array(
+            "draw" => intval($datos['draw']), // for every request/draw by clientside , they send a number as a parameter, when they recieve a response/data they first check the draw number, so we are sending same number in draw. 
+            "recordsTotal" => intval($totalData), // total number of records
+            "recordsFiltered" => intval($totalFiltered), // total number of records after searching, if there is no searching then totalFiltered = totalData
+            "data" => $data   // total data array
+        );
+
+        return json_encode($json_data);
+    }
+
+    public function modalEditarMetaTag($datos) {
+        $id = $datos['id'];
+        $sqlTitle = $this->db->select("SELECT
+                                            m.es_texto,
+                                            m.en_texto
+                                    FROM
+                                            meta_tags mt
+                                    LEFT JOIN menu m ON m.id = mt.id_menu
+                                    WHERE
+                                            mt.id = $id");
+        $sql = $this->db->select("SELECT * FROM meta_tags where id = $id");
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" class="frmEditarMetaTags" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="col-lg-12">
+                                <div class="tabs-container">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a data-toggle="tab" href="#tab-1"> Español</a></li>
+                                        <li class=""><a data-toggle="tab" href="#tab-2">English</a></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab-1" class="tab-pane active">
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>ES Texto</label>
+                                                        <input type="text" name="es_title" class="form-control" value="' . utf8_encode($sql[0]['es_title']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>ES Descripcion</label>
+                                                        <textarea style="height:80px;" name="es_descripcion" class="form-control">' . utf8_encode($sql[0]['es_descripcion']) . '</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>ES Keywords y/o frases (palabras separadas por comas)</label>
+                                                        <textarea style="height:80px;" name="es_keywords" class="form-control">' . utf8_encode($sql[0]['es_keywords']) . '</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="tab-2" class="tab-pane">
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>En Texto</label>
+                                                        <input type="text" name="en_title" class="form-control" value="' . utf8_encode($sql[0]['en_title']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>EN Descripcion</label>
+                                                        <textarea style="height:80px;" name="en_descripcion" class="form-control">' . utf8_encode($sql[0]['en_descripcion']) . '</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>EN Keywords y/o frases (palabras separadas por comas)</label>
+                                                        <textarea style="height:80px;" name="en_keywords" class="form-control">' . utf8_encode($sql[0]['en_keywords']) . '</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            
+                            <div class="clearfix"></div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Editar Item ' . utf8_encode($sqlTitle[0]['es_texto']) . '|' . utf8_encode($sqlTitle[0]['en_texto']),
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function frmEditarMetaTags($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'es_descripcion' => utf8_decode($datos['es_descripcion']),
+            'es_keywords' => utf8_decode($datos['es_keywords']),
+            'en_descripcion' => utf8_decode($datos['en_descripcion']),
+            'en_keywords' => utf8_decode($datos['en_keywords']),
+            'es_title' => utf8_decode($datos['es_title']),
+            'en_title' => utf8_decode($datos['en_title']),
+        );
+        $this->db->update('meta_tags', $update, "id = $id");
+        $sqlPagina = $this->db->select("SELECT
+                                                m.es_texto,
+                                                en_texto
+                                        FROM
+                                                meta_tags mt
+                                        LEFT JOIN menu m ON m.id = mt.id_menu WHERE mt.id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => $this->rowDataTable('meta_tags', 'meta_tags', $id),
+            'id' => $id,
+            'mensaje' => 'Se ha actualizado correctamente los metatags de la pagina "' . utf8_encode($sqlPagina[0]['es_texto']) . ' | ' . utf8_encode($sqlPagina[0]['en_texto']) . '"'
         );
         return $data;
     }
