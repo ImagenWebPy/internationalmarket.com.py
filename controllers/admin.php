@@ -23,8 +23,8 @@ class Admin extends Controller {
         $this->view->idioma = $this->idioma;
         $this->view->title = 'Redes';
         $this->view->getRedesTable = $this->model->getRedesTable();
-        $this->view->public_css = array("css/plugins/iCheck/custom.css");
-        $this->view->public_js = array("js/plugins/iCheck/icheck.min.js");
+        $this->view->public_css = array("css/plugins/iCheck/custom.css", "css/plugins/summernote/summernote.css", "css/plugins/toastr/toastr.min.css");
+        $this->view->public_js = array("js/plugins/iCheck/icheck.min.js", "js/plugins/summernote/summernote.min.js", "js/plugins/toastr/toastr.min.js");
         $this->view->render('admin/header');
         $this->view->render('admin/redes/index');
         $this->view->render('admin/footer');
@@ -74,6 +74,33 @@ class Admin extends Controller {
             unset($_SESSION['message']);
     }
 
+    public function logo() {
+        $this->view->helper = $this->helper;
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Logo';
+        $this->view->logos = $this->helper->getLogos();
+        $this->view->public_css = array("css/plugins/html5fileupload/html5fileupload.css");
+        $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/logo/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
+
+    public function contacto() {
+        $this->view->helper = $this->helper;
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Contacto';
+        $this->view->public_css = array("css/plugins/dataTables/datatables.min.css");
+        $this->view->public_js = array("js/plugins/dataTables/datatables.min.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/contacto/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
+
     public function modalEditarRedes() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
@@ -94,6 +121,19 @@ class Admin extends Controller {
             'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
         );
         $data = $this->model->frmEditarRedes($datos);
+        echo json_encode($data);
+    }
+
+    public function frmAgregarRedes() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'descripcion' => (!empty($_POST['descripcion'])) ? $this->helper->cleanInput($_POST['descripcion']) : NULL,
+            'url' => (!empty($_POST['url'])) ? $this->helper->cleanInput($_POST['url']) : NULL,
+            'fontawesome' => (!empty($_POST['fontawesome'])) ? $this->helper->cleanInput($_POST['fontawesome']) : NULL,
+            'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
+        );
+        $data = $this->model->frmAgregarRedes($datos);
         echo json_encode($data);
     }
 
@@ -161,6 +201,12 @@ class Admin extends Controller {
         echo json_encode($datos);
     }
 
+    public function modalAgregarRedes() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = $this->model->modalAgregarRedes($this->idioma);
+        echo json_encode($datos);
+    }
+
     public function frmAgregarUsuario() {
         if (!empty($_POST)) {
             $data = array(
@@ -214,6 +260,48 @@ class Admin extends Controller {
         );
         $data = $this->model->frmEditarMetaTags($datos);
         echo json_encode($data);
+    }
+
+    public function uploadImgLogoCabacera() {
+        if (!empty($_POST)) {
+            $this->model->unlinkLogoCabecera();
+            $error = false;
+            $absolutedir = dirname(__FILE__);
+            $dir = 'public/images/';
+            $serverdir = $dir;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            $filename = $this->helper->cleanUrl($name);
+            $filename = $filename . '.' . $extension;
+            $handle = fopen($serverdir . $filename, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #############
+            header('Content-type: application/json; charset=utf-8');
+            $data = array(
+                'imagen' => $filename
+            );
+            $response = $this->model->uploadImgLogoCabacera($data);
+            echo json_encode($response);
+        }
+    }
+
+    public function listadoDTContacto() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = $this->model->listadoDTContacto($_REQUEST);
+        echo $data;
+    }
+
+    public function modalVerContacto() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->modalVerContacto($data);
+        echo $datos;
     }
 
 }

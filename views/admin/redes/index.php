@@ -64,18 +64,42 @@ if (isset($_SESSION['message'])) {
 <script>
     $(document).ready(function () {
         $(document).on("submit", "#frmEditarRedes", function (e) {
-            var url = "<?= URL . $this->idioma ?>/admin/frmEditarRedes"; // the script where you handle the form input.
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: $("#frmEditarRedes").serialize(), // serializes the form's elements.
-                success: function (data)
-                {
-                    $("#redes_" + data.id).html(data.content);
-                    $(".genericModal").modal("toggle");
-                }
-            });
-            e.preventDefault(); // avoid to execute the actual submit of the form.
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmEditarRedes"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: $("#frmEditarRedes").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        $("#redes_" + data.id).html(data.content);
+                        $(".genericModal").modal("toggle");
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on("submit", "#frmAgregarRedes", function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmAgregarRedes"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: $("#frmAgregarRedes").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        $("#tablaRedes").append(data.content);
+                        $(".genericModal").modal("toggle");
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
         });
     });
 </script>

@@ -71,7 +71,7 @@ class Helper {
         $data = str_replace("'", "\'", $data);
         $data = htmlspecialchars($data);
         $data = stripslashes($data);
-
+        $data = strip_tags($data);
         return $data;
     }
 
@@ -1050,6 +1050,11 @@ class Helper {
 
     public function retornarIdioma() {
         return $this->idioma;
+    }
+
+    public function getLogos() {
+        $sql = $this->db->select("select logo from logo where id = 1");
+        return $sql[0];
     }
 
 }

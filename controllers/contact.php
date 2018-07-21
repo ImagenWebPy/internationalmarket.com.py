@@ -25,4 +25,17 @@ class Contact extends Controller {
         $this->view->render('footer');
     }
 
+    public function frmContacto() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'idioma' => $this->idioma,
+            'name' => (!empty($_POST['name'])) ? $this->helper->cleanInput($_POST['name']) : NULL,
+            'mail' => (!empty($_POST['mail'])) ? $this->helper->cleanInput($_POST['mail']) : NULL,
+            'subject' => (!empty($_POST['subject'])) ? $this->helper->cleanInput($_POST['subject']) : NULL,
+            'comment' => (!empty($_POST['comment'])) ? $this->helper->cleanInput($_POST['comment']) : NULL
+        );
+        $data = $this->model->frmContacto($datos);
+        echo json_encode($data);
+    }
+
 }

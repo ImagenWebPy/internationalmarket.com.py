@@ -70,20 +70,23 @@
             }
         });
         $(document).on("submit", ".frmEditarMetaTags", function (e) {
-            e.preventDefault(); // avoid to execute the actual submit of the form.
-            var url = "<?= URL . $this->idioma ?>/admin/frmEditarMetaTags"; // the script where you handle the form input.
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: $(".frmEditarMetaTags").serialize(), // serializes the form's elements.
-                success: function (data)
-                {
-                    $("#metatag_" + data.id).html(data.content);
-                    $(".genericModal").modal("toggle");
-                    toastr.success(data.mensaje);
-                }
-            });
-
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault();// avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmEditarMetaTags"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: $(".frmEditarMetaTags").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        $("#metatag_" + data.id).html(data.content);
+                        $(".genericModal").modal("toggle");
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
         });
     });
 </script>

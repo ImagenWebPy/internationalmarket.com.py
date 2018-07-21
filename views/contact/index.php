@@ -26,11 +26,13 @@
             <div class="section dark" style="padding:20px 0 0px; background-image:url(<?= URL; ?>public/images/parallax/<?= $this->contacto['imagen_parallax']; ?>); background-repeat:no-repeat; background-position:center; background-attachment:fixed; -webkit-background-size:cover; background-size:cover">
                 <div class="section_wrapper clearfix">
                     <div class="items_group clearfix">
-                        <div class="column one-third column" style="margin-top: 20px;">
+                        <div class="column one-third column" style="margin-top: 20px;" id="divForm">
                             <div role="form" class="wpcf7" id="wpcf7-f8643-p165-o1" dir="ltr">
                                 <div class="screen-reader-response">
                                 </div>
-                                <form id="contact-form" class="contact">
+                                <form id="contact-form" class="contact" id="frmContacto">
+                                    <input type="hidden" value="<?= URL . $this->idioma; ?>/contact/frmContacto" name="url">
+                                    <input type="hidden" value="<?= $this->idioma; ?>" name="idioma">
                                     <p>
                                         <span class="wpcf7-form-control-wrap name">
                                             <input type="text"  name="name" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_nombre']); ?>"/>
@@ -41,7 +43,7 @@
                                         </span>
 
                                         <span class="wpcf7-form-control-wrap subject">
-                                            <input type="text" name="website" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_asunto']); ?>"/>
+                                            <input type="text" name="subject" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="<?= utf8_encode($this->contacto['frm_asunto']); ?>"/>
                                         </span>
 
                                         <span class="wpcf7-form-control-wrap message">
@@ -56,9 +58,6 @@
                         <div class="column one-third contact_box">
                             <div class="get_in_touch">
                                 <div class="inside">
-                                    <div class="photo">
-                                        <img class="scale-with-grid" src="upload/get_in_touch.jpg" alt=""/>
-                                    </div>
                                     <ul>
                                         <li class="address"><i class="fa fa-map-marker"></i>
                                             <p>
