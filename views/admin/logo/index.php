@@ -5,7 +5,6 @@
             <li>
                 <a href="<?= URL . $this->idioma; ?>/admin">Inicio</a>
             </li>
-            <li><a>Contenido</a></li>
             <li class="active">
                 <strong>Logos</strong>
             </li>

@@ -264,14 +264,19 @@ class Admin_Model extends Model {
                 break;
             case 'blog':
                 if ($sql[0]['estado'] == 1) {
-                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="blog" data-rowid="blog_" data-tabla="web_blog" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="blog" data-rowid="blog_" data-tabla="blog" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
                 } else {
-                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="blog" data-rowid="blog_" data-tabla="web_blog" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="blog" data-rowid="blog_" data-tabla="blog" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
                 }
                 $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarBlogPost"><i class="fa fa-edit"></i> Editar </a>';
-                $imagen = '<img class="img-responsive imgBlogTable" src="' . URL . 'public/images/blog/' . $sql[0]['imagen_thumb'] . '">';
+                if (empty($sql[0]['youtube_id'])) {
+                    $imagen = '<img class="img-responsive imgBlogTable" src="' . URL . 'public/images/blog/' . $sql[0]['imagen_thumb'] . '">';
+                } else {
+                    $imagen = '<iframe class="scale-with-grid" src="http://www.youtube.com/embed/' . $sql[0]['youtube_id'] . '?wmode=opaque" allowfullscreen></iframe>';
+                }
                 $data = '<td>' . $sql[0]['id'] . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['titulo']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_titulo']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_titulo']) . '</td>'
                         . '<td>' . $imagen . '</td>'
                         . '<td>' . date('d-m-Y', strtotime($sql[0]['fecha_blog'])) . '</td>'
                         . '<td>' . $estado . '</td>'
@@ -747,7 +752,21 @@ class Admin_Model extends Model {
             'logo' => $datos['imagen']
         );
         $this->db->update('logo', $update, "id = $id");
-        $contenido = '<img class="img-responsive" src="' . URL . 'public/images//' . $datos['imagen'] . '">';
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgHeaderNeoPure($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('neo_pure', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
         $data = array(
             "result" => true,
             'content' => $contenido,
@@ -759,6 +778,12 @@ class Admin_Model extends Model {
         $logo = $this->helper->getLogos();
         $dir = 'public/images/';
         unlink($dir . $logo['logo']);
+    }
+
+    public function unlinkImagenNeoPure() {
+        $sql = $this->db->select("select imagen_header from neo_pure where id = 1");
+        $dir = 'public/images/header/';
+        unlink($dir . $sql[0]['imagen_header']);
     }
 
     public function listadoDTContacto($datos) {
@@ -868,6 +893,492 @@ class Admin_Model extends Model {
             'row' => $this->rowDataTable('verContacto', 'frm_contacto', $id)
         );
         return json_encode($data);
+    }
+
+    public function listadoDTBlog($datos) {
+        $columns = array(
+            0 => 'id',
+            1 => 'titulo',
+            2 => 'imagen_thumb',
+            3 => 'fecha_blog',
+            4 => 'estado',
+            6 => 'accion',
+        );
+        #getting total number records without any search
+        $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog");
+        $totalFiltered = $sql[0]['cantidad'];
+        $totalData = $sql[0]['cantidad'];
+
+        $query = "SELECT * FROM blog where 1 = 1";
+        $where = "";
+        if (!empty($datos['search']['value'])) {
+            $where .= " AND (titulo LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR fecha_blog LIKE '%" . $requestData['search']['value'] . "%')";
+            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+            $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog where 1 = 1 $where");
+            $totalFiltered = $sql[0]['cantidad'];
+        }
+        $query .= $where;
+        $query .= " ORDER BY " . $columns[$datos['order'][0]['column']] . "   " . $datos['order'][0]['dir'] . "  LIMIT " . $datos['start'] . " ," . $datos['length'] . "   ";
+        $sql = $this->db->select($query);
+        $data = array();
+        foreach ($sql as $row) {  // preparing an array
+            $id = $row["id"];
+            if ($row['estado'] == 1) {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="blog" data-rowid="blog_" data-tabla="blog" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+            } else {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="blog" data-rowid="blog_" data-tabla="blog" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+            }
+            $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarBlogPost"><i class="fa fa-edit"></i> Editar </a>';
+            if (empty($row['youtube_id'])) {
+                $imagen = '<img class="img-responsive imgBlogTable" src="' . URL . 'public/images/blog/' . $row['imagen_thumb'] . '">';
+            } else {
+                $imagen = '<iframe class="scale-with-grid" src="http://www.youtube.com/embed/' . $row['youtube_id'] . '?wmode=opaque" allowfullscreen></iframe>';
+            }
+            $nestedData = array();
+            $nestedData['DT_RowId'] = 'blog_' . $id;
+            $nestedData[] = $id;
+            $nestedData[] = utf8_encode($row["es_titulo"]);
+            $nestedData[] = utf8_encode($row["en_titulo"]);
+            $nestedData[] = $imagen;
+            $nestedData[] = date('d-m-Y', strtotime($row["fecha_blog"]));
+            $nestedData[] = $estado;
+            $nestedData[] = $btnEditar;
+            $data[] = $nestedData;
+        }
+
+        $json_data = array(
+            "draw" => intval($datos['draw']), // for every request/draw by clientside , they send a number as a parameter, when they recieve a response/data they first check the draw number, so we are sending same number in draw. 
+            "recordsTotal" => intval($totalData), // total number of records
+            "recordsFiltered" => intval($totalFiltered), // total number of records after searching, if there is no searching then totalFiltered = totalData
+            "data" => $data   // total data array
+        );
+
+        return json_encode($json_data);
+    }
+
+    public function modalEditarBlogPost($datos) {
+        $id = $datos['id'];
+        $lng = $datos['idioma'];
+        $sql = $this->db->select("select * from blog where id = $id");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarBlogPost" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ES Titulo</label>
+                                        <input type="text" name="es_titulo" class="form-control" placeholder="Nombre" value="' . utf8_encode($sql[0]['es_titulo']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>EN Titulo</label>
+                                        <input type="text" name="en_titulo" class="form-control" placeholder="Nombre" value="' . utf8_encode($sql[0]['en_titulo']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ID video Youtube</label>
+                                        <input type="text" name="youtube_id" class="form-control" placeholder="ID video Youtube" value="' . utf8_encode($sql[0]['youtube_id']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group" id="data_1">
+                                            <label class="font-normal">Fecha Publicación</label>
+                                            <div class="input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="fecha_blog" value="' . date('d/m/Y', strtotime($sql[0]['fecha_blog'])) . '">
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ES Tags</label>
+                                        <input type="text" name="es_tags" class="form-control" placeholder="ES Tags" value="' . utf8_encode($sql[0]['es_tags']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>EN Tags</label>
+                                        <input type="text" name="en_tags" class="form-control" placeholder="EN Tags" value="' . utf8_encode($sql[0]['en_tags']) . '">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                            <div class="col-lg-12">
+                                <div class="tabs-container">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                        <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab-1" class="tab-pane active">
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Contenido</label>
+                                                        <textarea name="es_contenido" class="summernote">' . utf8_encode($sql[0]['es_contenido']) . '</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="tab-2" class="tab-pane">
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Contenido</label>
+                                                        <textarea name="en_contenido" class="summernote">' . utf8_encode($sql[0]['en_contenido']) . '</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                        </form>
+                        <hr>
+                        <div class="col-md-12">
+                            <h3>Imagen del Blog</h3>
+                            <div class="alert alert-warning alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                <strong>No subir una imagen para el blog si va a vincular un video de Youtube al contenido, porque la misma no será visible.</strong>
+                            </div>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG, PNG<br>
+                                    -Dimensión: Hasta 1200 x 800px<br>
+                                    -Tamaño: 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload fileBlog" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgBlog" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.fileBlog").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgBlog" + response.id).html(response.content);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <div class="col-md-12" id="imgBlog' . $id . '">';
+        if (!empty($sql[0]['imagen'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/blog/' . $sql[0]['imagen'] . '">';
+        }
+        $modal .= '     </div>
+                        <div class="col-md-12">
+                            <h3>Imagen de Cabecera</h3>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG, PNG<br>
+                                    -Dimensión: Hasta 1400 x 788<br>
+                                    -Tamaño: 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload fileTestimonio" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgBlogHeader" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.fileTestimonio").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgBlogHeader" + response.id).html(response.content);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <div class="col-md-12" id="imgBlogHeader' . $id . '">';
+        if (!empty($sql[0]['imagen_header'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/header/' . $sql[0]['imagen_header'] . '">';
+        }
+        $modal .= '     </div>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Editar Entrada del Blog',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function frmEditarBlogPost($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        $fecha_blog = $datos['fecha_blog'];
+        $fecha_blog = str_replace('/', '-', $fecha_blog);
+        $fecha_blog = date('Y-m-d', strtotime($fecha_blog));
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_titulo' => utf8_decode($datos['es_titulo']),
+            'en_titulo' => utf8_decode($datos['en_titulo']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'es_tags' => utf8_decode($datos['es_tags']),
+            'en_tags' => utf8_decode($datos['en_tags']),
+            'youtube_id' => utf8_decode($datos['youtube_id']),
+            'fecha_blog' => $fecha_blog,
+            'estado' => $estado
+        );
+        $this->db->update('blog', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => $this->rowDataTable('blog', 'blog', $id),
+            'id' => $id
+        );
+        return $data;
+    }
+
+    public function frmContenidoNeoPure($datos) {
+        $update = array(
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+        );
+        $this->db->update('neo_pure', $update, "id = 1");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se ha actualizado exitosamente el contenido de la pagina',
+        );
+        return $data;
+    }
+
+    public function unlinkActualBlogImg($idPost) {
+        $dir = 'public/images/blog/';
+        $sql = $this->db->select("select imagen, imagen_thumb from blog where id = $idPost");
+        if (file_exists($dir . $sql[0]['imagen'])) {
+            unlink($dir . $sql[0]['imagen']);
+        }
+        if (file_exists($dir . $sql[0]['imagen_thumb'])) {
+            unlink($dir . $sql[0]['imagen_thumb']);
+        }
+    }
+
+    public function uploadImgBlog($data) {
+        $id = $data['id'];
+        $update = array(
+            'imagen' => $data['imagen'],
+            'imagen_thumb' => $data['imagen_thumb'],
+        );
+        $this->db->update('blog', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/blog/' . $data['imagen_thumb'] . '">';
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id,
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
+    public function uploadImgBlogHeader($data) {
+        $id = $data['id'];
+        $update = array(
+            'imagen_header' => $data['imagen']
+        );
+        $this->db->update('blog', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $data['imagen'] . '">';
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id,
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
+    public function modalAgregarBlogPost($lng) {
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Contenido al Blog</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarBlogPost" method="POST" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ES Titulo</label>
+                                        <input type="text" name="es_titulo" class="form-control" placeholder="Nombre" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>EN Titulo</label>
+                                        <input type="text" name="en_titulo" class="form-control" placeholder="Nombre" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ES Tags</label>
+                                        <input type="text" name="es_tags" class="form-control" placeholder="ES Tags" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>EN Tags</label>
+                                        <input type="text" name="en_tags" class="form-control" placeholder="EN Tags" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ID video Youtube</label>
+                                        <input type="text" name="youtube_id" class="form-control" placeholder="ID video Youtube" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group" id="data_1">
+                                            <label class="font-normal">Fecha Publicación</label>
+                                            <div class="input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="fecha_blog" value="">
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                                <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                                <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                    <div class="panel-body">
+                                                            <div class="col-md-12">
+                                                                    <div class="form-group">
+                                                                            <label>Contenido</label>
+                                                                            <textarea name="es_contenido" class="summernote"></textarea>
+                                                                    </div>
+                                                            </div>
+                                                    </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                    <div class="panel-body">
+                                                            <div class="col-md-12">
+                                                                    <div class="form-group">
+                                                                            <label>Contenido</label>
+                                                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                                                    </div>
+                                                            </div>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <h3>Imagen del Blog</h3>
+                                <div class="alert alert-warning alert-dismissable">
+                                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                    <strong>No subir una imagen para el blog si va a vincular un video de Youtube al contenido, porque la misma no será visible.</strong>
+                                </div>
+                                <div class="alert alert-info alert-dismissable">
+                                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                    Detalles de la imagen a subir:<br>
+                                        -Formato: JPG,PNG<br>
+                                        -Dimensión: Hasta 1200 x 800px<br>
+                                        -Tamaño: Hasta 2MB<br>
+                                    <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                                </div>
+                                <div class="html5fileupload fileAgregarBlog" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                    <input type="file" name="file_archivo" />
+                                </div>
+                                <script>
+                                    $(".html5fileupload.fileAgregarBlog").html5fileupload();
+                                </script>
+                            </div>
+                            <div class="col-md-12">
+                                <h3>Imagen de Cabecera</h3>
+                                <div class="alert alert-info alert-dismissable">
+                                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                    Detalles de la imagen a subir:<br>
+                                        -Formato: JPG,PNG<br>
+                                        -Dimensión: Hasta 1400 x 788<br>
+                                        -Tamaño: Hasta 2MB<br>
+                                    <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                                </div>
+                                <div class="html5fileupload fileAgregarBlogHeader" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                    <input type="file" name="file_archivo_header" />
+                                </div>
+                                <script>
+                                    $(".html5fileupload.fileAgregarBlogHeader").html5fileupload();
+                                </script>
+                            </div>
+                            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Blog</button>
+                        </form>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Agregar Entrada al Blog',
+            'content' => $modal
+        );
+        return $data;
+    }
+
+    public function frmAddBlogImg($imagenes) {
+        $id = $imagenes['id'];
+        $update = array(
+            'imagen' => $imagenes['imagen'],
+            'imagen_thumb' => $imagenes['imagen_thumb'],
+            'imagen_header' => $imagenes['imagen_header']
+        );
+        $this->db->update('blog', $update, "id = $id");
+    }
+
+    public function frmAgregarBlogPost($datos) {
+        $fecha_blog = $datos['fecha_blog'];
+        $fecha_blog = str_replace('/', '-', $fecha_blog);
+        $fecha_blog = date('Y-m-d', strtotime($fecha_blog));
+        $this->db->insert('blog', array(
+            'es_titulo' => utf8_decode($datos['es_titulo']),
+            'en_titulo' => utf8_decode($datos['en_titulo']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'es_tags' => utf8_decode($datos['es_tags']),
+            'en_tags' => utf8_decode($datos['en_tags']),
+            'youtube_id' => $datos['youtube_id'],
+            'fecha_blog' => $fecha_blog,
+            'fecha' => date('Y-m-d H:i:s'),
+            'estado' => $datos['estado']
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
+    public function datosNeoPure() {
+        $sql = $this->db->select("SELECT
+                                        *
+                                FROM
+                                        neo_pure
+                                WHERE id =1;");
+        return $sql[0];
     }
 
 }
