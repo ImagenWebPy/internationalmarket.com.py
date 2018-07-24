@@ -222,26 +222,26 @@ class Admin_Model extends Model {
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
-            case 'verContacto':
-                if ($sql[0]['leido'] == 1) {
-                    $estado = '<span class="label label-primary">Leído</span>';
+            case 'logistica':
+                if ($sql[0]['estado'] == 1) {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="logistica" data-rowid="logistica_" data-tabla="logistica" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
                 } else {
-                    $estado = '<span class="label label-danger">No Leído</span>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="logistica" data-rowid="logistica_" data-tabla="logistica" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
                 }
-                $btnEditar = '<a class="btnVerContacto pointer btn-xs" data-id="' . $id . '" data-url="modalVerContacto"><i class="fa fa-edit"></i> Ver Datos </a>';
-                $data = '<td>' . $id . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['nombre']) . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['email']) . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['asunto']) . '</td>'
-                        . '<td>' . date('d-m-Y H:i:s', strtotime($sql[0]['fecha'])) . '</td>'
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarLogistica"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['orden']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_header_text']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_header_text']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_menu']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_menu']) . '</td>'
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
             case 'slider':
                 if ($sql[0]['estado'] == 1) {
-                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="slider" data-rowid="slider_" data-tabla="web_inicio_slider" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="slider" data-rowid="slider_" data-tabla="slider" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
                 } else {
-                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="slider" data-rowid="slider_" data-tabla="web_inicio_slider" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="slider" data-rowid="slider_" data-tabla="slider" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
                 }
                 $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTSlider"><i class="fa fa-edit"></i> Editar </a>';
                 if (!empty($sql[0]['imagen'])) {
@@ -249,16 +249,10 @@ class Admin_Model extends Model {
                 } else {
                     $img = '';
                 }
-                if ($sql[0]['principal'] == 1) {
-                    $principal = '<span class="badge badge-warning">Principal</span>';
-                } else {
-                    $principal = '<span class="badge">Normal</span>';
-                }
                 $data = '<td>' . $sql[0]['orden'] . '</td>'
                         . '<td>' . $img . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['texto_1']) . '</td>'
-                        . '<td>' . utf8_encode($sql[0]['texto_2']) . '</td>'
-                        . '<td>' . $principal . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_texto1']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_texto1']) . '</td>'
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
@@ -391,6 +385,11 @@ class Admin_Model extends Model {
         }
         $json = '{"data": ' . json_encode($datos) . '}';
         return $json;
+    }
+
+    public function listadoLogistica() {
+        $sql = $this->db->select("SELECT id, orden, es_header_text, en_header_text, es_menu, en_menu, estado FROM logistica ORDER BY orden ASC;");
+        return $sql;
     }
 
     public function modalEditarDTUsuario($datos) {
@@ -774,16 +773,128 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function uploadImgLogisticaHeader($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('logistica', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgHeaderCalidad($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('quality', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgBlogHeaderListado($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('blog_header', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgHeaderContacto($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('contacto', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgFormularioContacto($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_parallax' => $datos['imagen']
+        );
+        $this->db->update('contacto', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/parallax/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
     public function unlinkLogoCabecera() {
         $logo = $this->helper->getLogos();
         $dir = 'public/images/';
-        unlink($dir . $logo['logo']);
+        if (file_exists($dir . $logo['logo'])) {
+            unlink($dir . $logo['logo']);
+        }
     }
 
     public function unlinkImagenNeoPure() {
         $sql = $this->db->select("select imagen_header from neo_pure where id = 1");
         $dir = 'public/images/header/';
-        unlink($dir . $sql[0]['imagen_header']);
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+
+    public function unlinkImagenBlogHeaderContacto() {
+        $sql = $this->db->select("SELECT
+                                        imagen_header
+                                FROM
+                                        `blog_header`
+                                WHERE
+                                        id = 1;");
+        $dir = 'public/images/header/';
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+
+    public function unlinkImagenCalidad() {
+        $sql = $this->db->select("select imagen_header from quality where id = 1");
+        $dir = 'public/images/header/';
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+
+    public function unlinkImagenContacto() {
+        $sql = $this->db->select("SELECT imagen_header FROM contacto where id = 1;");
+        $dir = 'public/images/header/';
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+
+    public function unlinkImagenFormularioContacto() {
+        $sql = $this->db->select("SELECT imagen_parallax FROM contacto where id = 1;");
+        $dir = 'public/images/parallax/';
+        if (file_exists($dir . $sql[0]['imagen_parallax'])) {
+            unlink($dir . $sql[0]['imagen_parallax']);
+        }
     }
 
     public function listadoDTContacto($datos) {
@@ -1120,6 +1231,229 @@ class Admin_Model extends Model {
         return json_encode($data);
     }
 
+    public function modalEditarLogistica($datos) {
+        $id = $datos['id'];
+        $lng = $datos['idioma'];
+        $sql = $this->db->select("select * from logistica where id = $id");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarLogistica" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Orden</label>
+                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Header Text</label>
+                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="' . utf8_encode($sql[0]['es_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Menu</label>
+                                                            <input type="text" name="es_menu" class="form-control" placeholder="ES Menu" value="' . utf8_encode($sql[0]['es_menu']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote">' . utf8_encode($sql[0]['es_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Header Text</label>
+                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="' . utf8_encode($sql[0]['en_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Menu</label>
+                                                            <input type="text" name="en_menu" class="form-control" placeholder="EN Menu" value="' . utf8_encode($sql[0]['en_menu']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote">' . utf8_encode($sql[0]['en_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                        </form>
+                        <hr>
+                        <div class="col-md-12">
+                            <h3>Imagen de Cabecera</h3>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG, PNG<br>
+                                    -Dimensión: Hasta 1400 x 788<br>
+                                    -Tamaño: 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload fileLogisticaHeader" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgLogisticaHeader" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.fileLogisticaHeader").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgLogisticaHeader" + response.id).html(response.content);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <div class="col-md-12" id="imgLogisticaHeader' . $id . '">';
+        if (!empty($sql[0]['imagen_header'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/header/' . $sql[0]['imagen_header'] . '">';
+        }
+        $modal .= '     </div>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Editar Sección',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function modalAgregarLogistica($datos) {
+        $lng = $datos;
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarLogistica" method="POST" enctype="multipart/form-data" method="POST">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Orden</label>
+                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Header Text</label>
+                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Menu</label>
+                                                            <input type="text" name="es_menu" class="form-control" placeholder="ES Menu" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Header Text</label>
+                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Menu</label>
+                                                            <input type="text" name="en_menu" class="form-control" placeholder="EN Menu" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <h3>Imagen de Cabecera</h3>
+                                    <div class="alert alert-info alert-dismissable">
+                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                        Detalles de la imagen a subir:<br>
+                                            -Formato: JPG, PNG<br>
+                                            -Dimensión: Hasta 1400 x 788<br>
+                                            -Tamaño: 2MB<br>
+                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                                    </div>
+                                    <div class="html5fileupload fileLogisticaHeaderAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                        <input type="file" name="file_archivo" />
+                                    </div>
+                                    <script>
+                                        $(".html5fileupload.fileLogisticaHeaderAgregar").html5fileupload();
+                                    </script>
+                                </div>
+                            </div>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
+                        </form>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Agregar Sección',
+            'content' => $modal
+        );
+        return $data;
+    }
+
     public function frmEditarBlogPost($datos) {
         $id = $datos['id'];
         $estado = 1;
@@ -1154,12 +1488,69 @@ class Admin_Model extends Model {
             'es_header_text' => utf8_decode($datos['es_header_text']),
             'es_contenido' => utf8_decode($datos['es_contenido']),
             'en_header_text' => utf8_decode($datos['en_header_text']),
-            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido'])
         );
         $this->db->update('neo_pure', $update, "id = 1");
         $data = array(
             'type' => 'success',
             'content' => 'Se ha actualizado exitosamente el contenido de la pagina',
+        );
+        return $data;
+    }
+
+    public function frmBlogTextos($datos) {
+        $update = array(
+            'es_header' => utf8_decode($datos['es_header']),
+            'es_footer' => utf8_decode($datos['es_footer']),
+            'en_header' => utf8_decode($datos['en_header']),
+            'en_footer' => utf8_decode($datos['en_footer'])
+        );
+        $this->db->update('blog_header', $update, "id = 1");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se ha actualizado exitosamente el contenido de los textos del blog',
+        );
+        return $data;
+    }
+
+    public function frmContenidoCalidad($datos) {
+        $update = array(
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+        );
+        $this->db->update('quality', $update, "id = 1");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se ha actualizado exitosamente el contenido de la pagina',
+        );
+        return $data;
+    }
+
+    public function frmContenidoContacto($datos) {
+        $update = array(
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'es_titulo' => utf8_decode($datos['es_titulo']),
+            'es_frm_nombre' => utf8_decode($datos['es_frm_nombre']),
+            'es_frm_email' => utf8_decode($datos['es_frm_email']),
+            'es_frm_asunto' => utf8_decode($datos['es_frm_asunto']),
+            'es_frm_mensaje' => utf8_decode($datos['es_frm_mensaje']),
+            'es_btn_enviar' => utf8_decode($datos['es_btn_enviar']),
+            'es_texto_ubicacion' => utf8_decode($datos['es_texto_ubicacion']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_titulo' => utf8_decode($datos['en_titulo']),
+            'en_frm_nombre' => utf8_decode($datos['en_frm_nombre']),
+            'en_frm_email' => utf8_decode($datos['en_frm_email']),
+            'en_frm_asunto' => utf8_decode($datos['en_frm_asunto']),
+            'en_frm_mensaje' => utf8_decode($datos['en_frm_mensaje']),
+            'en_btn_enviar' => utf8_decode($datos['en_btn_enviar']),
+            'en_texto_ubicacion' => utf8_decode($datos['en_texto_ubicacion']),
+        );
+        $this->db->update('contacto', $update, "id = 1");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se ha actualizado exitosamente los textos de la pagina de contacto',
         );
         return $data;
     }
@@ -1270,24 +1661,24 @@ class Admin_Model extends Model {
                                         </ul>
                                         <div class="tab-content">
                                             <div id="tab-1" class="tab-pane active">
-                                                    <div class="panel-body">
-                                                            <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                            <label>Contenido</label>
-                                                                            <textarea name="es_contenido" class="summernote"></textarea>
-                                                                    </div>
-                                                            </div>
+                                                <div class="panel-body">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote"></textarea>
+                                                        </div>
                                                     </div>
+                                                </div>
                                             </div>
                                             <div id="tab-2" class="tab-pane">
-                                                    <div class="panel-body">
-                                                            <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                            <label>Contenido</label>
-                                                                            <textarea name="en_contenido" class="summernote"></textarea>
-                                                                    </div>
-                                                            </div>
+                                                <div class="panel-body">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                                        </div>
                                                     </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1352,6 +1743,14 @@ class Admin_Model extends Model {
         $this->db->update('blog', $update, "id = $id");
     }
 
+    public function frmAddHeaderImgLogisticaImg($imagenes) {
+        $id = $imagenes['id'];
+        $update = array(
+            'imagen_header' => $imagenes['imagen_header']
+        );
+        $this->db->update('logistica', $update, "id = $id");
+    }
+
     public function frmAgregarBlogPost($datos) {
         $fecha_blog = $datos['fecha_blog'];
         $fecha_blog = str_replace('/', '-', $fecha_blog);
@@ -1372,6 +1771,21 @@ class Admin_Model extends Model {
         return $id;
     }
 
+    public function frmAgregarLogistica($datos) {
+        $this->db->insert('logistica', array(
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'es_menu' => utf8_decode($datos['es_menu']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_menu' => utf8_decode($datos['en_menu']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'orden' => $datos['orden'],
+            'estado' => $datos['estado']
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
     public function datosNeoPure() {
         $sql = $this->db->select("SELECT
                                         *
@@ -1379,6 +1793,319 @@ class Admin_Model extends Model {
                                         neo_pure
                                 WHERE id =1;");
         return $sql[0];
+    }
+
+    public function datosContacto() {
+        $sql = $this->db->select("SELECT
+                                        *
+                                FROM
+                                        contacto
+                                WHERE id =1;");
+        return $sql[0];
+    }
+
+    public function datosCalidad() {
+        $sql = $this->db->select("SELECT
+                                        *
+                                FROM
+                                        quality
+                                WHERE
+                                        id = 1;");
+        return $sql[0];
+    }
+
+    public function datosBlog() {
+        $sql = $this->db->select("SELECT
+                                        *
+                                FROM
+                                        `blog_header`
+                                WHERE
+                                        id = 1;");
+        return $sql[0];
+    }
+
+    public function listadoDTSlider() {
+        $sql = $this->db->select("SELECT * FROM slider ORDER BY orden ASC;");
+        $datos = array();
+        foreach ($sql as $item) {
+            $id = $item['id'];
+            if ($item['estado'] == 1) {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="slider" data-rowid="slider_" data-tabla="slider" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+            } else {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="slider" data-rowid="slider_" data-tabla="slider" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+            }
+            $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTSlider"><i class="fa fa-edit"></i> Editar </a>';
+            if (!empty($item['imagen'])) {
+                $img = '<img src="' . URL . 'public/images/slider/' . $item['imagen'] . '" style="width: 160px;">';
+            } else {
+                $img = '-';
+            }
+            array_push($datos, array(
+                "DT_RowId" => "slider_$id",
+                'orden' => $item['orden'],
+                'imagen' => $img,
+                'es_texto1' => utf8_encode($item['es_texto1']),
+                'en_texto1' => utf8_encode($item['en_texto1']),
+                'estado' => $estado,
+                'editar' => $btnEditar
+            ));
+        }
+        $json = '{"data": ' . json_encode($datos) . '}';
+        return $json;
+    }
+
+    public function modalEditarDTSlider($datos) {
+        $id = $datos['id'];
+        $sql = $this->db->select("select * from slider where id = $id");
+        $checked = ($sql[0]['estado'] == 1) ? 'checked' : '';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos del Slider</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarSlider" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Orden</label>
+                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="tabs-container">
+                                    <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab-1" class="tab-pane active">
+                                            <div class="panel-body">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Encabezado</label>
+                                                        <input type="text" name="es_texto1" class="form-control" value="' . utf8_encode($sql[0]['es_texto1']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Destacado</label>
+                                                        <input type="text" name="es_texto2" class="form-control" value="' . utf8_encode($sql[0]['es_texto2']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Botón</label>
+                                                        <input type="text" name="es_boton" class="form-control" value="' . utf8_encode($sql[0]['es_boton']) . '">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="tab-2" class="tab-pane">
+                                            <div class="panel-body">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Encabezado</label>
+                                                        <input type="text" name="en_texto1" class="form-control" value="' . utf8_encode($sql[0]['en_texto1']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Destacado</label>
+                                                        <input type="text" name="en_texto2" class="form-control" value="' . utf8_encode($sql[0]['en_texto2']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Botón</label>
+                                                        <input type="text" name="en_boton" class="form-control" value="' . utf8_encode($sql[0]['en_boton']) . '">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-warning">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-warning"></i> Posiciones
+                                        </div>
+                                        <div class="panel-body">
+                                            <p>Solo modificaque los valores en caso de que desee cambiar la posición de los textos y/o botón del slider</p>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición X Encabezado</label>
+                                                        <input type="text" name="data_x_1" class="form-control" value="' . utf8_encode($sql[0]['data_x_1']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición Y Encabezado</label>
+                                                        <input type="text" name="data_y_1" class="form-control" value="' . utf8_encode($sql[0]['data_y_1']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Inicio Encabezado</label>
+                                                        <input type="text" name="data_start_1" class="form-control" value="' . utf8_encode($sql[0]['data_start_1']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Velocidad Encabezado</label>
+                                                        <input type="text" name="data_speed_1" class="form-control" value="' . utf8_encode($sql[0]['data_speed_1']) . '">
+                                                    </div>
+                                                </div>
+                                            </div><!--/row-->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición X Destacado</label>
+                                                        <input type="text" name="data_x_2" class="form-control" value="' . utf8_encode($sql[0]['data_x_2']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición Y Destacado</label>
+                                                        <input type="text" name="data_y_2" class="form-control" value="' . utf8_encode($sql[0]['data_y_2']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Inicio Destacado</label>
+                                                        <input type="text" name="data_start_2" class="form-control" value="' . utf8_encode($sql[0]['data_start_2']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Velocidad Destacado</label>
+                                                        <input type="text" name="data_speed_2" class="form-control" value="' . utf8_encode($sql[0]['data_speed_2']) . '">
+                                                    </div>
+                                                </div>
+                                            </div><!--/row-->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición X Botón</label>
+                                                        <input type="text" name="boton_x" class="form-control" value="' . utf8_encode($sql[0]['boton_x']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición Y Botón</label>
+                                                        <input type="text" name="boton_y" class="form-control" value="' . utf8_encode($sql[0]['boton_y']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Inicio Botón</label>
+                                                        <input type="text" name="boton_start" class="form-control" value="' . utf8_encode($sql[0]['boton_start']) . '">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Velocidad Botón</label>
+                                                        <input type="text" name="boton_speed" class="form-control" value="' . utf8_encode($sql[0]['boton_speed']) . '">
+                                                    </div>
+                                                </div>
+                                            </div><!--/row-->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                            </div>
+                        </form>
+                        <hr>
+                        <div class="col-md-12">
+                            <h3>Imagen</h3>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG,PNG (La imagen principal tiene que ser PNG transparente)<br>
+                                    -Dimensión: Imagen Normal: 1920 x 1080px, Imagen Principal: 310 x 649px<br>
+                                    -Tamaño: Hasta 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload fileSlider" data-max-filesize="2048000" data-url="' . URL . 'admin/uploadImgSlider" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.fileSlider").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgSlider" + response.id).html(response.content);
+                                        $("#slider_" + response.id).html(response.row);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <div class="col-md-12" id="imgSlider' . $id . '">';
+        if (!empty($sql[0]['imagen'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/slider/' . $sql[0]['imagen'] . '">';
+        }
+        $modal .= '     </div>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Editar Slider',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function frmEditarSlider($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_texto1' => utf8_decode($datos['es_texto1']),
+            'es_texto2' => utf8_decode($datos['es_texto2']),
+            'es_boton' => utf8_decode($datos['es_boton']),
+            'en_texto1' => utf8_decode($datos['en_texto1']),
+            'en_texto2' => utf8_decode($datos['en_texto2']),
+            'en_boton' => utf8_decode($datos['en_boton']),
+            'data_x_1' => utf8_decode($datos['data_x_1']),
+            'data_y_1' => utf8_decode($datos['data_y_1']),
+            'data_start_1' => utf8_decode($datos['data_start_1']),
+            'data_speed_1' => utf8_decode($datos['data_speed_1']),
+            'data_x_2' => utf8_decode($datos['data_x_2']),
+            'data_y_2' => utf8_decode($datos['data_y_2']),
+            'data_start_2' => utf8_decode($datos['data_start_2']),
+            'data_speed_2' => utf8_decode($datos['data_speed_2']),
+            'boton_x' => utf8_decode($datos['boton_x']),
+            'boton_y' => utf8_decode($datos['boton_y']),
+            'boton_start' => utf8_decode($datos['boton_start']),
+            'boton_speed' => utf8_decode($datos['boton_speed']),
+            'orden' => $datos['orden'],
+            'estado' => $estado
+        );
+        $this->db->update('slider', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'id' => $id,
+            'content' => $this->rowDataTable('slider', 'slider', $id),
+            'message' => 'Se ha actualizado el contenido del slider'
+        );
+        return $data;
     }
 
 }
