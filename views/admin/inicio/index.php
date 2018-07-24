@@ -62,17 +62,82 @@
 
             </div>
         </div><!-- /COL-LG-12-->
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Seccion 1</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content" style="display: none;">
+                    <div class="row">
+                        <form role="form" id="frmEditarIndexSeccion1" method="POST">
+                            <input type="hidden" name="id" value="<?= utf8_encode($this->datosSeccion1['id']); ?>">
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" <?= ($this->datosSeccion1['estado'] == 1) ? 'checked' : '' ?>> <i></i> Mostrar </label></div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="tabs-container">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a data-toggle="tab" href="#tab-1">ES Contenido</a></li>
+                                        <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab-1" class="tab-pane active">
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>ES Texto</label>
+                                                        <input type="text" name="es_titulo" class="form-control" value="<?= utf8_encode($this->datosSeccion1['es_titulo']); ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>ES Contenido</label>
+                                                        <textarea style="height:80px;" name="es_contenido" class="summernote"><?= utf8_encode($this->datosSeccion1['es_contenido']); ?></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="tab-2" class="tab-pane">
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>EN Texto</label>
+                                                        <input type="text" name="en_titulo" class="form-control" value="<?= utf8_encode($this->datosSeccion1['en_titulo']); ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>EN Contenido</label>
+                                                        <textarea style="height:80px;" name="en_contenido" class="summernote"><?= utf8_encode($this->datosSeccion1['en_contenido']); ?></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Actualizar Contenido</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-
-
-
-
-
+            </div>
+        </div><!-- /COL-LG-12-->
 
     </div>
 </div>
 <script>
     $(document).ready(function () {
+        $(".i-checks").iCheck({
+            checkboxClass: "icheckbox_square-green"
+        });
         $(".summernote").summernote({
             height: 300, // set editor height
             minHeight: null, // set minimum height of editor
@@ -95,7 +160,6 @@
             }
 
         });
-
         $(document).on("submit", "#frmEditarSlider", function (e) {
             e.preventDefault(); // avoid to execute the actual submit of the form.
             var url = "<?= URL . $this->idioma ?>/admin/frmEditarSlider"; // the script where you handle the form input.
@@ -110,6 +174,23 @@
                     toastr.success(data.message);
                 }
             });
+        });
+        $(document).on("submit", "#frmEditarIndexSeccion1", function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmEditarIndexSeccion1"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: $("#frmEditarIndexSeccion1").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
         });
     });
 </script>

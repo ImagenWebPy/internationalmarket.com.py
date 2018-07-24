@@ -122,7 +122,9 @@ class Admin extends Controller {
         $this->view->helper = $this->helper;
         $this->view->idioma = $this->idioma;
         $this->view->title = 'Inicio';
-        $this->view->datosBlog = $this->model->datosBlog();
+
+        $this->view->datosSeccion1 = $this->model->datosSeccion(1);
+
         $this->view->public_css = array("css/plugins/dataTables/datatables.min.css", "css/plugins/html5fileupload/html5fileupload.css", "css/plugins/toastr/toastr.min.css", "css/plugins/iCheck/custom.css", "css/plugins/summernote/summernote.css");
         $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
         $this->view->public_js = array("js/plugins/dataTables/datatables.min.js", "js/plugins/toastr/toastr.min.js", "js/plugins/summernote/summernote.min.js", "js/plugins/iCheck/icheck.min.js");
@@ -1033,6 +1035,20 @@ class Admin extends Controller {
             ));
         }
         header('Location:' . URL . 'admin/inicio/');
+    }
+
+    public function frmEditarIndexSeccion1() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'es_titulo' => (!empty($_POST['es_titulo'])) ? $this->helper->cleanInput($_POST['es_titulo']) : NULL,
+            'es_contenido' => (!empty($_POST['es_contenido'])) ? $_POST['es_contenido'] : NULL,
+            'en_titulo' => (!empty($_POST['en_titulo'])) ? $this->helper->cleanInput($_POST['en_titulo']) : NULL,
+            'en_contenido' => (!empty($_POST['en_contenido'])) ? $_POST['en_contenido'] : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0
+        );
+        $datos = $this->model->frmEditarIndexSeccion1($data);
+        echo json_encode($datos);
     }
 
 }
