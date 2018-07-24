@@ -1877,6 +1877,20 @@ class Admin_Model extends Model {
                                 </div>
                             </div>
                             <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Enlace ES</label>
+                                        <input type="text" name="es_url" class="form-control" placeholder="Enlace ES" value="' . utf8_encode($sql[0]['es_url']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Enlace EN</label>
+                                        <input type="text" name="en_url" class="form-control" placeholder="Enlace EN" value="' . utf8_encode($sql[0]['en_url']) . '">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="tabs-container">
                                     <ul class="nav nav-tabs">
                                             <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
@@ -2096,6 +2110,8 @@ class Admin_Model extends Model {
             'boton_start' => utf8_decode($datos['boton_start']),
             'boton_speed' => utf8_decode($datos['boton_speed']),
             'orden' => $datos['orden'],
+            'es_url' => $datos['es_url'],
+            'en_url' => $datos['en_url'],
             'estado' => $estado
         );
         $this->db->update('slider', $update, "id = $id");
@@ -2106,6 +2122,257 @@ class Admin_Model extends Model {
             'message' => 'Se ha actualizado el contenido del slider'
         );
         return $data;
+    }
+
+    public function modalAgregarSlider($lng) {
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Slider</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarSlider" method="POST" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Orden</label>
+                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Enlace ES</label>
+                                        <input type="text" name="es_url" class="form-control" placeholder="Enlace" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Enlace EN</label>
+                                        <input type="text" name="en_url" class="form-control" placeholder="Enlace" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="tabs-container">
+                                    <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab-1" class="tab-pane active">
+                                            <div class="panel-body">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Encabezado</label>
+                                                        <input type="text" name="es_texto1" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Destacado</label>
+                                                        <input type="text" name="es_texto2" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Botón</label>
+                                                        <input type="text" name="es_boton" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="tab-2" class="tab-pane">
+                                            <div class="panel-body">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Encabezado</label>
+                                                        <input type="text" name="en_texto1" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Destacado</label>
+                                                        <input type="text" name="en_texto2" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Texto Botón</label>
+                                                        <input type="text" name="en_boton" class="form-control" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-warning">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-warning"></i> Posiciones
+                                        </div>
+                                        <div class="panel-body">
+                                            <p>Solo modificaque los valores en caso de que desee cambiar la posición de los textos y/o botón del slider</p>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición X Encabezado</label>
+                                                        <input type="text" name="data_x_1" class="form-control" value="63">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición Y Encabezado</label>
+                                                        <input type="text" name="data_y_1" class="form-control" value="228">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Inicio Encabezado</label>
+                                                        <input type="text" name="data_start_1" class="form-control" value="500">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Velocidad Encabezado</label>
+                                                        <input type="text" name="data_speed_1" class="form-control" value="900">
+                                                    </div>
+                                                </div>
+                                            </div><!--/row-->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición X Destacado</label>
+                                                        <input type="text" name="data_x_2" class="form-control" value="76">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición Y Destacado</label>
+                                                        <input type="text" name="data_y_2" class="form-control" value="169">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Inicio Destacado</label>
+                                                        <input type="text" name="data_start_2" class="form-control" value="800">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Velocidad Destacado</label>
+                                                        <input type="text" name="data_speed_2" class="form-control" value="1000">
+                                                    </div>
+                                                </div>
+                                            </div><!--/row-->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición X Botón</label>
+                                                        <input type="text" name="boton_x" class="form-control" value="240">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Posición Y Botón</label>
+                                                        <input type="text" name="boton_y" class="form-control" value="286">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Inicio Botón</label>
+                                                        <input type="text" name="boton_start" class="form-control" value="1100">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Velocidad Botón</label>
+                                                        <input type="text" name="boton_speed" class="form-control" value="1000">
+                                                    </div>
+                                                </div>
+                                            </div><!--/row-->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Imagen</h3>
+                                    <div class="alert alert-info alert-dismissable">
+                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                        Detalles de la imagen a subir:<br>
+                                            -Formato: JPG,PNG<br>
+                                            -Dimensión: Imagen Normal: 1920 x 755<br>
+                                            -Tamaño: Hasta 2MB<br>
+                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                                    </div>
+                                    <div class="html5fileupload fileAgregarSlider" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                        <input type="file" name="file_archivo" />
+                                    </div>
+                                    <script>
+                                        $(".html5fileupload.fileAgregarSlider").html5fileupload();
+                                    </script>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Slider</button>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Agregar Slider',
+            'content' => $modal
+        );
+        return $data;
+    }
+
+    public function frmAgregarSlider($datos) {
+        $this->db->insert('slider', array(
+            'es_texto1' => utf8_decode($datos['es_texto1']),
+            'es_texto2' => utf8_decode($datos['es_texto2']),
+            'es_boton' => utf8_decode($datos['es_boton']),
+            'en_texto1' => utf8_decode($datos['en_texto1']),
+            'en_texto2' => utf8_decode($datos['en_texto2']),
+            'en_boton' => utf8_decode($datos['en_boton']),
+            'data_x_1' => $datos['data_x_1'],
+            'data_y_1' => $datos['data_y_1'],
+            'data_start_1' => $datos['data_start_1'],
+            'data_speed_1' => $datos['data_speed_1'],
+            'data_x_2' => $datos['data_x_2'],
+            'data_y_2' => $datos['data_y_2'],
+            'data_start_2' => $datos['data_start_2'],
+            'data_speed_2' => $datos['data_speed_2'],
+            'boton_x' => $datos['boton_x'],
+            'boton_y' => $datos['boton_y'],
+            'boton_start' => $datos['boton_start'],
+            'boton_speed' => $datos['boton_speed'],
+            'orden' => $datos['orden'],
+            'estado' => $datos['estado'],
+            'es_url' => $datos['es_url'],
+            'en_url' => $datos['en_url']
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
+    public function frmAddSliderImg($imagenes) {
+        $id = $imagenes['id'];
+        $update = array(
+            'imagen' => $imagenes['imagenes']
+        );
+        $this->db->update('slider', $update, "id = $id");
     }
 
 }

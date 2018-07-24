@@ -943,7 +943,7 @@ class Helper {
                                         boton_y,
                                         boton_speed,
                                         boton_start,
-                                        url
+                                        " . $lng . "_url as url
                                 FROM
                                         slider
                                 WHERE
