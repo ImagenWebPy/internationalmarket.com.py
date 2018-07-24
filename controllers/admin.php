@@ -118,6 +118,21 @@ class Admin extends Controller {
             unset($_SESSION['message']);
     }
 
+    public function inicio() {
+        $this->view->helper = $this->helper;
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Inicio';
+        $this->view->datosBlog = $this->model->datosBlog();
+        $this->view->public_css = array("css/plugins/dataTables/datatables.min.css", "css/plugins/html5fileupload/html5fileupload.css", "css/plugins/toastr/toastr.min.css", "css/plugins/iCheck/custom.css", "css/plugins/summernote/summernote.css");
+        $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
+        $this->view->public_js = array("js/plugins/dataTables/datatables.min.js", "js/plugins/toastr/toastr.min.js", "js/plugins/summernote/summernote.min.js", "js/plugins/iCheck/icheck.min.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/inicio/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
+
     public function logistics() {
         $this->view->helper = $this->helper;
         $this->view->idioma = $this->idioma;
@@ -900,6 +915,50 @@ class Admin extends Controller {
             ));
         }
         header('Location:' . URL . $this->idioma . '/admin/logistics/');
+    }
+
+    public function listadoDTSlider() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = $this->model->listadoDTSlider();
+        echo $data;
+    }
+
+    public function modalEditarDTSlider() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->modalEditarDTSlider($data);
+        echo $datos;
+    }
+
+    public function frmEditarSlider() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+            'es_texto1' => (!empty($_POST['es_texto1'])) ? $this->helper->cleanInput($_POST['es_texto1']) : NULL,
+            'es_texto2' => (!empty($_POST['es_texto2'])) ? $this->helper->cleanInput($_POST['es_texto2']) : NULL,
+            'es_boton' => (!empty($_POST['es_boton'])) ? $this->helper->cleanInput($_POST['es_boton']) : NULL,
+            'en_texto1' => (!empty($_POST['en_texto1'])) ? $this->helper->cleanInput($_POST['en_texto1']) : NULL,
+            'en_texto2' => (!empty($_POST['en_texto2'])) ? $this->helper->cleanInput($_POST['en_texto2']) : NULL,
+            'en_boton' => (!empty($_POST['en_boton'])) ? $this->helper->cleanInput($_POST['en_boton']) : NULL,
+            'data_x_1' => (!empty($_POST['data_x_1'])) ? $this->helper->cleanInput($_POST['data_x_1']) : NULL,
+            'data_y_1' => (!empty($_POST['data_y_1'])) ? $this->helper->cleanInput($_POST['data_y_1']) : NULL,
+            'data_start_1' => (!empty($_POST['data_start_1'])) ? $this->helper->cleanInput($_POST['data_start_1']) : NULL,
+            'data_speed_1' => (!empty($_POST['data_speed_1'])) ? $this->helper->cleanInput($_POST['data_speed_1']) : NULL,
+            'data_x_2' => (!empty($_POST['data_speed_1'])) ? $this->helper->cleanInput($_POST['data_x_2']) : NULL,
+            'data_y_2' => (!empty($_POST['data_y_2'])) ? $this->helper->cleanInput($_POST['data_y_2']) : NULL,
+            'data_start_2' => (!empty($_POST['data_start_2'])) ? $this->helper->cleanInput($_POST['data_start_2']) : NULL,
+            'data_speed_2' => (!empty($_POST['data_speed_2'])) ? $this->helper->cleanInput($_POST['data_speed_2']) : NULL,
+            'boton_x' => (!empty($_POST['boton_x'])) ? $this->helper->cleanInput($_POST['boton_x']) : NULL,
+            'boton_y' => (!empty($_POST['boton_y'])) ? $this->helper->cleanInput($_POST['boton_y']) : NULL,
+            'boton_start' => (!empty($_POST['boton_start'])) ? $this->helper->cleanInput($_POST['boton_start']) : NULL,
+            'boton_speed' => (!empty($_POST['boton_speed'])) ? $this->helper->cleanInput($_POST['boton_speed']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
+        );
+        $data = $this->model->frmEditarSlider($datos);
+        echo json_encode($data);
     }
 
 }
