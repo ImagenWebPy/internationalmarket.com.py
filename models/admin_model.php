@@ -1596,6 +1596,20 @@ class Admin_Model extends Model {
         );
         return $datos;
     }
+    
+    public function uploadImgSeccion2($data) {
+        $id = 1;
+        $update = array(
+            'imagen' => $data['imagen']
+        );
+        $this->db->update('index_seccion2', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/' . $data['imagen'] . '">';
+        $datos = array(
+            "result" => TRUE,
+            'content' => $contenido
+        );
+        return $datos;
+    }
 
     public function modalAgregarBlogPost($lng) {
         $modal = '<div class="box box-primary">
@@ -2397,6 +2411,29 @@ class Admin_Model extends Model {
         $data = array(
             'type' => 'success',
             'mensaje' => 'Se ha actualizado el contenido de la sección 1'
+        );
+        return $data;
+    }
+
+    public function frmEditarIndexSeccion2($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'es_boton' => utf8_decode($datos['es_boton']),
+            'en_boton' => utf8_decode($datos['en_boton']),
+            'es_url' => utf8_decode($datos['es_url']),
+            'en_url' => utf8_decode($datos['en_url']),
+            'estado' => $estado
+        );
+        $this->db->update('index_seccion2', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'mensaje' => 'Se ha actualizado el contenido de la sección 2'
         );
         return $data;
     }

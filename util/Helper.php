@@ -971,7 +971,7 @@ class Helper {
                                         imagen,
                                         " . $lng . "_contenido as contenido,
                                         " . $lng . "_boton as boton,
-                                        url
+                                        " . $lng . "_url as url
                                 FROM
                                         index_seccion2
                                 WHERE
