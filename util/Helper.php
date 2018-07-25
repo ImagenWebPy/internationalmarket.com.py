@@ -996,8 +996,8 @@ class Helper {
     public function cargarSeccion4($lng) {
         $sql = $this->db->select("SELECT
                                         " . $lng . "_titulo as titulo,
-                                        " . $lng . "_contendio as contenido,
-                                        id_video_yuotube as video
+                                        " . $lng . "_contenido as contenido,
+                                        id_video_youtube as video
                                 FROM
                                         index_seccion4
                                 WHERE
@@ -1024,7 +1024,7 @@ class Helper {
                                 FROM
                                         index_seccion5_items
                                 WHERE
-                                        estado = 1");
+                                        estado = 1 ORDER BY orden ASC");
         return (!empty($sql)) ? $sql : NULL;
     }
 

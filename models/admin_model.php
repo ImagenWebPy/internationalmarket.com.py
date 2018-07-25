@@ -302,6 +302,19 @@ class Admin_Model extends Model {
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
+            case 'seccion5':
+                if ($sql[0]['estado'] == 1) {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="seccion5" data-rowid="seccion5_" data-tabla="index_seccion5_items" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                } else {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="seccion5" data-rowid="seccion5_" data-tabla="index_seccion5_items" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                }
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTSeccion5"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['orden']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_item']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_item']) . '</td>'
+                        . '<td>' . $estado . '</td>'
+                        . '<td>' . $btnEditar . '</td>';
+                break;
             case 'meta_tags':
                 $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMetaTag"><i class="fa fa-edit"></i> Editar </a>';
                 $data = '<td>' . $id . '</td>'
@@ -1596,7 +1609,7 @@ class Admin_Model extends Model {
         );
         return $datos;
     }
-    
+
     public function uploadImgSeccion2($data) {
         $id = 1;
         $update = array(
@@ -1604,6 +1617,20 @@ class Admin_Model extends Model {
         );
         $this->db->update('index_seccion2', $update, "id = $id");
         $contenido = '<img class="img-responsive" src="' . URL . 'public/images/' . $data['imagen'] . '">';
+        $datos = array(
+            "result" => TRUE,
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
+    public function uploadImgSeccion3($data) {
+        $id = 1;
+        $update = array(
+            'imagen' => $data['imagen']
+        );
+        $this->db->update('index_seccion3', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/parallax/' . $data['imagen'] . '">';
         $datos = array(
             "result" => TRUE,
             'content' => $contenido
@@ -1860,6 +1887,30 @@ class Admin_Model extends Model {
                 'imagen' => $img,
                 'es_texto1' => utf8_encode($item['es_texto1']),
                 'en_texto1' => utf8_encode($item['en_texto1']),
+                'estado' => $estado,
+                'editar' => $btnEditar
+            ));
+        }
+        $json = '{"data": ' . json_encode($datos) . '}';
+        return $json;
+    }
+
+    public function listadoDTSeccion5() {
+        $sql = $this->db->select("SELECT * FROM index_seccion5_items ORDER BY orden ASC;");
+        $datos = array();
+        foreach ($sql as $item) {
+            $id = $item['id'];
+            if ($item['estado'] == 1) {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="seccion5" data-rowid="seccion5_" data-tabla="index_seccion5_items" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+            } else {
+                $estado = '<a class="pointer btnCambiarEstado" data-seccion="seccion5" data-rowid="seccion5_" data-tabla="index_seccion5_items" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+            }
+            $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTSeccion5"><i class="fa fa-edit"></i> Editar </a>';
+            array_push($datos, array(
+                "DT_RowId" => "seccion5_$id",
+                'orden' => $item['orden'],
+                'es_item' => utf8_encode($item['es_item']),
+                'en_item' => utf8_encode($item['en_item']),
                 'estado' => $estado,
                 'editar' => $btnEditar
             ));
@@ -2390,7 +2441,7 @@ class Admin_Model extends Model {
     }
 
     public function datosSeccion($seccion) {
-        $sql = $this->db->select("select * from index_seccion" . $seccion);
+        $sql = $this->db->select("select * from index_seccion" . $seccion . " where id = 1");
         return $sql[0];
     }
 
@@ -2434,6 +2485,68 @@ class Admin_Model extends Model {
         $data = array(
             'type' => 'success',
             'mensaje' => 'Se ha actualizado el contenido de la sección 2'
+        );
+        return $data;
+    }
+
+    public function frmEditarIndexSeccion3($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_titulo' => utf8_decode($datos['es_titulo']),
+            'en_titulo' => utf8_decode($datos['en_titulo']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'estado' => $estado
+        );
+        $this->db->update('index_seccion3', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'mensaje' => 'Se ha actualizado el contenido de la sección 3'
+        );
+        return $data;
+    }
+
+    public function frmEditarIndexSeccion4($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_titulo' => utf8_decode($datos['es_titulo']),
+            'en_titulo' => utf8_decode($datos['en_titulo']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'id_video_youtube' => utf8_decode($datos['id_video_youtube']),
+            'estado' => $estado
+        );
+        $this->db->update('index_seccion4', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'mensaje' => 'Se ha actualizado el contenido de la sección 4'
+        );
+        return $data;
+    }
+
+    public function frmEditarIndexSeccion5($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_titulo' => utf8_decode($datos['es_titulo']),
+            'en_titulo' => utf8_decode($datos['en_titulo']),
+            'estado' => $estado
+        );
+        $this->db->update('index_seccion5', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'mensaje' => 'Se ha actualizado el contenido de la sección 5'
         );
         return $data;
     }
