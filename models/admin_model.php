@@ -477,6 +477,11 @@ class Admin_Model extends Model {
         $sql = $this->db->select("SELECT id, orden, es_header_text, en_header_text, es_menu, en_menu, estado FROM logistica ORDER BY orden ASC;");
         return $sql;
     }
+    
+    public function listadoCertificaciones() {
+        $sql = $this->db->select("SELECT * FROM certificaciones ORDER BY orden ASC;");
+        return $sql;
+    }
 
     public function modalEditarDTUsuario($datos) {
         $id = $datos['id'];
