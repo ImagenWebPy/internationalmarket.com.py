@@ -188,6 +188,35 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function frmAgregarIndexSeccionItem5($datos) {
+        $this->db->insert('index_seccion5_items', array(
+            'es_item' => utf8_decode($datos['es_item']),
+            'en_item' => utf8_decode($datos['en_item']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => (!empty($datos['estado'])) ? $datos['estado'] : 0
+        ));
+        $id = $this->db->lastInsertId();
+        $sql = $this->db->select("select * from index_seccion5_items where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $estado = '<a class="pointer btnCambiarEstado" data-seccion="seccion5" data-rowid="seccion5_" data-tabla="index_seccion5_items" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+        } else {
+            $estado = '<a class="pointer btnCambiarEstado" data-seccion="seccion5" data-rowid="seccion5_" data-tabla="index_seccion5_items" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+        }
+        $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarDTSeccion5"><i class="fa fa-edit"></i> Editar </a>';
+        $data = array(
+            'type' => 'success',
+            'content' => '<tr id="seccion5_' . $id . '" role="row" class="odd">'
+            . '<td class="sorting_1">' . utf8_encode($sql[0]['orden']) . '</td>'
+            . '<td>' . utf8_encode($sql[0]['es_item']) . '</td>'
+            . '<td>' . utf8_encode($sql[0]['en_item']) . '</td>'
+            . '<td>' . $estado . '</td>'
+            . '<td>' . $btnEditar . '</td>'
+            . '</tr>',
+            'mensaje' => 'Se ha agregado correctamente Item'
+        );
+        return $data;
+    }
+
     private function rowDataTable($seccion, $tabla, $id) {
         //$sql = $this->db->select("SELECT * FROM $tabla WHERE id = $id;");
         $data = '';
@@ -374,6 +403,50 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function frmEditarNosotrosEncabezado($datos) {
+        $id = 1;
+        $update = array(
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'en_header_text' => utf8_decode($datos['en_header_text'])
+        );
+        $row = $this->db->update('nosotros', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se ha actualizado el contenido del encabezado'
+        );
+        return $data;
+    }
+
+    public function frmEditarContenidoNosostros($datos) {
+        $id = 1;
+        $update = array(
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'es_contenido_adicional' => utf8_decode($datos['es_contenido_adicional']),
+            'en_contenido_adicional' => utf8_decode($datos['en_contenido_adicional'])
+        );
+        $row = $this->db->update('nosotros', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se ha actualizado el contenido de la pagina nosotros'
+        );
+        return $data;
+    }
+
+    public function frmEditarNosotrosParallax($datos) {
+        $id = 1;
+        $update = array(
+            'es_texto_parallax' => utf8_decode($datos['es_texto_parallax']),
+            'en_texto_parallax' => utf8_decode($datos['en_texto_parallax'])
+        );
+        $row = $this->db->update('nosotros', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => 'Se han actualizado los textos'
+        );
+        return $data;
+    }
+
     public function listadoDTUsuarios() {
         $sql = $this->db->select("SELECT wa.id, wa.nombre, wa.email, wr.descripcion as rol, wa.estado
                                 FROM usuario wa
@@ -478,6 +551,112 @@ class Admin_Model extends Model {
             'content' => $modal
         );
         return json_encode($data);
+    }
+
+    public function modalEditarDTSeccion5($datos) {
+        $id = $datos['id'];
+        $sql = $this->db->select("SELECT * FROM `index_seccion5_items` where id = $id");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarIndexSeccionItem5" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>ES Item</label>
+                                    <input type="text" name="es_item" class="form-control" value="' . utf8_encode($sql[0]['es_item']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>EN Item</label>
+                                    <input type="text" name="en_item" class="form-control" value="' . utf8_encode($sql[0]['en_item']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Orden</label>
+                                    <input type="text" name="orden" class="form-control" value="' . utf8_encode($sql[0]['orden']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                            </div>
+                            <hr>
+                            <div class="clearfix"></div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Item</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green"
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Editar Item de la Seccion 5',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function modalAgregarItemSeccion5() {
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmAgregarIndexSeccionItem5" method="POST">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>ES Item</label>
+                                    <input type="text" name="es_item" class="form-control" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>EN Item</label>
+                                    <input type="text" name="en_item" class="form-control" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Orden</label>
+                                    <input type="text" name="orden" class="form-control" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" > <i></i> Mostrar </label></div>
+                            </div>
+                            <hr>
+                            <div class="clearfix"></div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Item</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green"
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Agregar Item',
+            'content' => $modal
+        );
+        return $data;
     }
 
     public function frmEditarUsuario($datos) {
@@ -785,6 +964,34 @@ class Admin_Model extends Model {
         );
         return $data;
     }
+    
+    public function uploadImgParallaxNosotros($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_parallax' => $datos['imagen']
+        );
+        $this->db->update('nosotros', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/parallax/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgHeaderNosotros($datos) {
+        $id = 1;
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('nosotros', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'content' => $contenido,
+        );
+        return $data;
+    }
 
     public function uploadImgLogisticaHeader($datos) {
         $id = $datos['id'];
@@ -867,6 +1074,22 @@ class Admin_Model extends Model {
 
     public function unlinkImagenNeoPure() {
         $sql = $this->db->select("select imagen_header from neo_pure where id = 1");
+        $dir = 'public/images/header/';
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+    
+    public function unlinkImagenParallaxNosotros() {
+        $sql = $this->db->select("select imagen_parallax from nosotros where id = 1");
+        $dir = 'public/images/parallax/';
+        if (file_exists($dir . $sql[0]['imagen_parallax'])) {
+            unlink($dir . $sql[0]['imagen_parallax']);
+        }
+    }
+
+    public function unlinkImagenNosotros() {
+        $sql = $this->db->select("select imagen_header from nosotros where id = 1");
         $dir = 'public/images/header/';
         if (file_exists($dir . $sql[0]['imagen_header'])) {
             unlink($dir . $sql[0]['imagen_header']);
@@ -1624,6 +1847,20 @@ class Admin_Model extends Model {
         return $datos;
     }
 
+    public function uploadImgSeccion5($data) {
+        $id = 1;
+        $update = array(
+            'imagen' => $data['imagen']
+        );
+        $this->db->update('index_seccion5', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/' . $data['imagen'] . '">';
+        $datos = array(
+            "result" => TRUE,
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
     public function uploadImgSeccion3($data) {
         $id = 1;
         $update = array(
@@ -1832,6 +2069,15 @@ class Admin_Model extends Model {
                                         *
                                 FROM
                                         neo_pure
+                                WHERE id =1;");
+        return $sql[0];
+    }
+
+    public function datosNosotros() {
+        $sql = $this->db->select("SELECT
+                                        *
+                                FROM
+                                        nosotros
                                 WHERE id =1;");
         return $sql[0];
     }
@@ -2547,6 +2793,28 @@ class Admin_Model extends Model {
         $data = array(
             'type' => 'success',
             'mensaje' => 'Se ha actualizado el contenido de la sección 5'
+        );
+        return $data;
+    }
+
+    public function frmEditarIndexSeccionItem5($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_item' => utf8_decode($datos['es_item']),
+            'en_item' => utf8_decode($datos['en_item']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => $estado
+        );
+        $this->db->update('index_seccion5_items', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => $this->rowDataTable('seccion5', 'index_seccion5_items', $id),
+            'mensaje' => 'Se ha actualizado el contenido del Item de la sección 5',
+            'id' => $id
         );
         return $data;
     }

@@ -485,6 +485,9 @@
                                     </tr>
                                 </tfoot>
                             </table>
+                            <div class="col-xs-6">
+                                <button type="button" class="btn btn-block btn-primary btnAgregarContenido" data-url="modalAgregarItemSeccion5">Agregar Item</button>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -507,18 +510,18 @@
                                         -Tamaño: 2MB<br>
                                         <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
                                     </div>
-                                    <div class="html5fileupload fileImagenSeccion3" data-max-filesize="2048000" data-url="<?= URL . $this->idioma; ?>/admin/uploadImgSeccion5" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                    <div class="html5fileupload fileImagenSeccion5" data-max-filesize="2048000" data-url="<?= URL . $this->idioma; ?>/admin/uploadImgSeccion5" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
                                         <input type="file" name="file_archivo" />
                                     </div>
                                     <script>
-                                        $(".html5fileupload.fileImagenSeccion3").html5fileupload({
+                                        $(".html5fileupload.fileImagenSeccion5").html5fileupload({
                                             onAfterStartSuccess: function (response) {
-                                                $("#imgImagenSeccion3").html(response.content);
+                                                $("#imgImagenSeccion5").html(response.content);
                                             }
                                         });
                                     </script>
                                     <div class="row">
-                                        <div class="col-md-12" id="imgImagenSeccion3">
+                                        <div class="col-md-12" id="imgImagenSeccion5">
                                             <img class="img-responsive" src="<?= URL ?>public/images/<?= $this->datosSeccion5['imagen']; ?>">';
                                         </div>
                                     </div>
@@ -667,6 +670,46 @@
                     data: $("#frmEditarIndexSeccion5").serialize(), // serializes the form's elements.
                     success: function (data)
                     {
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on("submit", "#frmEditarIndexSeccionItem5", function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmEditarIndexSeccionItem5"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: 'json',
+                    data: $("#frmEditarIndexSeccionItem5").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        $("#seccion5_" + data.id).html(data.content);
+                        $(".genericModal").modal("toggle");
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on("submit", "#frmAgregarIndexSeccionItem5", function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmAgregarIndexSeccionItem5"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: 'json',
+                    data: $("#frmAgregarIndexSeccionItem5").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        $(".dataTables-seccion5 > tbody").append(data.content);
+                        $(".genericModal").modal("toggle");
                         toastr.success(data.mensaje);
                     }
                 });
