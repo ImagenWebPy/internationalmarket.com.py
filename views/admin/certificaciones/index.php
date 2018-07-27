@@ -45,13 +45,13 @@
                                 foreach ($this->listadoCertificaciones as $item):
                                     $id = $item['id'];
                                     if ($item['estado'] == 1) {
-                                        $estado = '<a class="pointer btnCambiarEstado" data-seccion="logistica" data-rowid="logistica_" data-tabla="logistica" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                                        $estado = '<a class="pointer btnCambiarEstado" data-seccion="certificacion" data-rowid="certificacion_" data-tabla="certificaciones" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
                                     } else {
-                                        $estado = '<a class="pointer btnCambiarEstado" data-seccion="logistica" data-rowid="logistica_" data-tabla="logistica" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                                        $estado = '<a class="pointer btnCambiarEstado" data-seccion="certificacion" data-rowid="certificacion_" data-tabla="certificaciones" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
                                     }
-                                    $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarLogistica"><i class="fa fa-edit"></i> Editar </a>';
+                                    $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarCertificaciones"><i class="fa fa-edit"></i> Editar </a>';
                                     ?>
-                                    <tr id="logistica_<?= $id; ?>">
+                                    <tr id="certificacion_<?= $id; ?>">
                                         <td><?= $item['orden']; ?></td>
                                         <td><?= utf8_encode($item['es_texto_header']); ?></td>
                                         <td><?= utf8_encode($item['en_texto_header']); ?></td>
@@ -76,7 +76,7 @@
                         </table>
                     </div>
                     <div class="row">
-                        <button type="button" class="btn btn-primary btnAgregarContenido" data-url="modalAgregarLogistica">Agregar Seccion</button>
+                        <button type="button" class="btn btn-primary btnAgregarContenido" data-url="modalAgregarCertificacion">Agregar Seccion</button>
                     </div>
                 </div>
             </div>
@@ -85,51 +85,18 @@
 </div>
 <script>
     $(document).ready(function () {
-
-        $(document).on("submit", "#frmEditarBlogPost", function (e) {
-            var url = "<?= URL . $this->idioma ?>/admin/frmEditarBlogPost"; // the script where you handle the form input.
+        $(document).on("submit", "#frmEditarCertificacion", function (e) {
+            var url = "<?= URL . $this->idioma ?>/admin/frmEditarCertificacion"; // the script where you handle the form input.
             $.ajax({
                 type: "POST",
                 url: url,
-                data: $("#frmEditarBlogPost").serialize(), // serializes the form's elements.
+                data: $("#frmEditarCertificacion").serialize(), // serializes the form's elements.
                 success: function (data)
                 {
                     if (data.type == 'success') {
-                        $("#blog_" + data.id).html(data.content);
+                        $('#certificacion_' + data.id).html(data.content);
                         $(".genericModal").modal("toggle");
-                        $(".summernote").summernote({
-                            height: 300, // set editor height
-                            minHeight: null, // set minimum height of editor
-                            maxHeight: null // set maximum height of editor
-                        });
-                        $(".i-checks").iCheck({
-                            checkboxClass: "icheckbox_square-green",
-                            radioClass: "iradio_square-green",
-                        });
-                        $("#data_1 .input-group.date").datepicker({
-                            todayBtn: "linked",
-                            keyboardNavigation: false,
-                            forceParse: false,
-                            calendarWeeks: true,
-                            autoclose: true,
-                            format: "dd/mm/yyyy",
-                        });
-                    }
-                }
-            });
-            e.preventDefault(); // avoid to execute the actual submit of the form.
-        });
-        $(document).on("submit", "#frmBlogTextos", function (e) {
-            var url = "<?= URL . $this->idioma; ?>/admin/frmBlogTextos"; // the script where you handle the form input.
-            $.ajax({
-                type: "POST",
-                url: url,
-                dataType: "json",
-                data: $("#frmBlogTextos").serialize(), // serializes the form's elements.
-                success: function (data)
-                {
-                    if (data.type == 'success') {
-                        toastr.success(data.content)
+                        toastr.success(data.mensaje);
                     }
                 }
             });
