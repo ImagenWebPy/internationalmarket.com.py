@@ -185,6 +185,21 @@ class Admin extends Controller {
         if (!empty($_SESSION['message']))
             unset($_SESSION['message']);
     }
+    
+    public function products() {
+        $this->view->helper = $this->helper;
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Productos';
+        $this->view->listadoProductos = $this->model->listadoProductos();
+        $this->view->public_css = array("css/plugins/html5fileupload/html5fileupload.css", "css/plugins/iCheck/custom.css", "css/wfmi-style.css", "css/plugins/toastr/toastr.min.css", "css/plugins/summernote/summernote.css", "css/plugins/datapicker/datepicker3.css");
+        $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
+        $this->view->public_js = array("js/plugins/iCheck/icheck.min.js", "js/plugins/toastr/toastr.min.js", "js/plugins/summernote/summernote.min.js", "js/plugins/datapicker/bootstrap-datepicker.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/products/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
 
     public function neopure() {
         $this->view->helper = $this->helper;
@@ -599,6 +614,41 @@ class Admin extends Controller {
             echo json_encode($response);
         }
     }
+    
+    public function uploadImgProductoHeader() {
+        if (!empty($_POST)) {
+            $idPost = $_POST['data']['id'];
+            $this->model->unlinkImagenNeoPure();
+            $error = false;
+            $absolutedir = dirname(__FILE__);
+            $dir = 'public/images/header/';
+            $serverdir = $dir;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            $filename = $this->helper->cleanUrl($name);
+            $filename = $filename . '.' . $extension;
+            $handle = fopen($serverdir . $filename, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #REDIMENSIONAR
+            $imagen = $serverdir . $filename;
+            $imagen_final = $filename;
+            $ancho = 1400;
+            $alto = 788;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdir);
+            #############
+            header('Content-type: application/json; charset=utf-8');
+            $data = array(
+                'id' => $idPost,
+                'imagen' => $filename
+            );
+            $response = $this->model->uploadImgProductoHeader($data);
+            echo json_encode($response);
+        }
+    }
 
     public function uploadImgHeaderCalidad() {
         if (!empty($_POST)) {
@@ -807,6 +857,16 @@ class Admin extends Controller {
             'idioma' => $this->idioma
         );
         $datos = $this->model->modalEditarCertificaciones($data);
+        echo $datos;
+    }
+   
+    public function modalEditarProductos() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'idioma' => $this->idioma
+        );
+        $datos = $this->model->modalEditarProductos($data);
         echo $datos;
     }
 
@@ -1126,6 +1186,12 @@ class Admin extends Controller {
         $datos = $this->model->modalAgregarCertificacion($this->idioma);
         echo json_encode($datos);
     }
+   
+    public function modalAgregarProducto() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = $this->model->modalAgregarProducto($this->idioma);
+        echo json_encode($datos);
+    }
 
     public function frmAgregarBlogPost() {
         if (!empty($_POST)) {
@@ -1285,7 +1351,60 @@ class Admin extends Controller {
                 'mensaje' => 'Se ha agregado correctamente el contenido'
             ));
         }
-        header('Location:' . URL . $this->idioma . '/admin/blog/');
+        header('Location:' . URL . $this->idioma . '/admin/certifications/');
+    }
+    
+    public function frmAgregarProducto() {
+        if (!empty($_POST)) {
+            $data = array(
+                'es_nombre' => (!empty($_POST['es_nombre'])) ? $this->helper->cleanInput($_POST['es_nombre']) : NULL,
+                'es_header_text' => (!empty($_POST['es_header_text'])) ? $this->helper->cleanInput($_POST['es_header_text']) : NULL,
+                'es_contenido' => (!empty($_POST['es_contenido'])) ? $_POST['es_contenido'] : NULL,
+                'en_nombre' => (!empty($_POST['en_nombre'])) ? $this->helper->cleanInput($_POST['en_nombre']) : NULL,
+                'en_header_text' => (!empty($_POST['en_header_text'])) ? $this->helper->cleanInput($_POST['en_header_text']) : NULL,
+                'en_contenido' => (!empty($_POST['en_contenido'])) ? $_POST['en_contenido'] : NULL,
+                'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+                'estado' => (!empty($_POST['estado'])) ? $_POST['estado'] : 0,
+            );
+            $idPost = $this->model->frmAgregarProducto($data);
+            #IMAGEN CERTIFICACION
+            if (!empty($_FILES['file_archivo']['name'])) {
+                $error = false;
+
+                #IMAGEN DEL HEADER
+                $dirHeader = 'public/images/header/';
+                $serverdirHeader = $dirHeader;
+                $newname = $idPost . '_' . $_FILES['file_archivo']['name'];
+                $fnameHeader = $this->helper->cleanUrl($newname);
+                $contents = file_get_contents($_FILES['file_archivo']['tmp_name']);
+
+                $handle = fopen($serverdirHeader . $fnameHeader, 'w');
+                fwrite($handle, $contents);
+                fclose($handle);
+
+                #############
+                #SE REDIMENSIONA LA IMAGEN
+                #############
+                # ruta de la imagen a redimensionar 
+                $imagen = $serverdirHeader . $fnameHeader;
+                $imagen_final = $fnameHeader;
+                $ancho = 1400;
+                $alto = 788;
+
+                $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdirHeader);
+                #############
+                $imagenes = array(
+                    'id' => $idPost,
+                    'imagen_header' => $fnameHeader
+                );
+                $this->model->frmAddProductoImg($imagenes);
+            }
+            Session::set('message', array(
+                'type' => 'success',
+                'mensaje' => 'Se ha agregado correctamente el contenido'
+            ));
+        }
+        header('Location:' . URL . $this->idioma . '/admin/products/');
     }
 
     public function frmAgregarLogistica() {
@@ -1483,6 +1602,23 @@ class Admin extends Controller {
             'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0
         );
         $datos = $this->model->frmEditarCertificacion($data);
+        echo json_encode($datos);
+    }
+   
+    public function frmEditarProducto() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'es_nombre' => (!empty($_POST['es_nombre'])) ? $this->helper->cleanInput($_POST['es_nombre']) : NULL,
+            'es_header_text' => (!empty($_POST['es_header_text'])) ? $this->helper->cleanInput($_POST['es_header_text']) : NULL,
+            'es_contenido' => (!empty($_POST['es_contenido'])) ? $_POST['es_contenido'] : NULL,
+            'en_nombre' => (!empty($_POST['en_nombre'])) ? $_POST['en_nombre'] : NULL,
+            'en_header_text' => (!empty($_POST['en_header_text'])) ? $_POST['en_header_text'] : NULL,
+            'en_contenido' => (!empty($_POST['en_contenido'])) ? $_POST['en_contenido'] : NULL,
+            'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0
+        );
+        $datos = $this->model->frmEditarProducto($data);
         echo json_encode($datos);
     }
 

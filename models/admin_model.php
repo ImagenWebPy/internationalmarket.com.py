@@ -354,6 +354,21 @@ class Admin_Model extends Model {
                         . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
+            case 'productos':
+                if ($sql[0]['estado'] == 1) {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="productos" data-rowid="productos_" data-tabla="productos" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                } else {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="productos" data-rowid="productos_" data-tabla="productos" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                }
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarProductos"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['orden']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_header_text']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_header_text']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_nombre']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_nombre']) . '</td>'
+                        . '<td>' . $estado . '</td>'
+                        . '<td>' . $btnEditar . '</td>';
+                break;
         }
         return $data;
     }
@@ -483,6 +498,11 @@ class Admin_Model extends Model {
 
     public function listadoCertificaciones() {
         $sql = $this->db->select("SELECT * FROM certificaciones ORDER BY orden ASC;");
+        return $sql;
+    }
+
+    public function listadoProductos() {
+        $sql = $this->db->select("SELECT * FROM productos ORDER BY orden ASC;");
         return $sql;
     }
 
@@ -1029,13 +1049,28 @@ class Admin_Model extends Model {
         );
         return $data;
     }
-    
+
     public function uploadImgCertificacionHeader($datos) {
         $id = $datos['id'];
         $update = array(
             'imagen_header' => $datos['imagen']
         );
         $this->db->update('certificaciones', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+    
+    public function uploadImgProductoHeader($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('productos', $update, "id = $id");
         $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
         $data = array(
             "result" => true,
@@ -1774,6 +1809,127 @@ class Admin_Model extends Model {
         return json_encode($data);
     }
 
+    public function modalEditarProductos($datos) {
+        $id = $datos['id'];
+        $lng = $datos['idioma'];
+        $sql = $this->db->select("select * from productos where id = $id");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarProducto" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Orden</label>
+                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Header Text</label>
+                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="' . utf8_encode($sql[0]['es_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Nombre</label>
+                                                            <input type="text" name="es_nombre" class="form-control" placeholder="ES Menu" value="' . utf8_encode($sql[0]['es_nombre']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote">' . utf8_encode($sql[0]['es_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Header Text</label>
+                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="' . utf8_encode($sql[0]['en_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Nombre</label>
+                                                            <input type="text" name="en_nombre" class="form-control" value="' . utf8_encode($sql[0]['en_nombre']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote">' . utf8_encode($sql[0]['en_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                        </form>
+                        <hr>
+                        </div>
+                        <div class="col-md-12">
+                            <h3>Imagen de Cabecera</h3>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG, PNG<br>
+                                    -Dimensión: Hasta 1400 x 788<br>
+                                    -Tamaño: 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload fileProductoHeader" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgProductoHeader" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.fileProductoHeader").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgCertificacionHeader" + response.id).html(response.content);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        <div class="col-md-12" id="imgCertificacionHeader' . $id . '">';
+        if (!empty($sql[0]['imagen_header'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/header/' . $sql[0]['imagen_header'] . '">';
+        }
+        $modal .= '     </div>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Editar Producto',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
     public function modalAgregarLogistica($datos) {
         $lng = $datos;
         $modal = '<div class="box box-primary">
@@ -1983,6 +2139,111 @@ class Admin_Model extends Model {
                                     </div>
                                     <script>
                                         $(".html5fileupload.fileCertificadoHeaderAgregar").html5fileupload();
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Agregar Sección',
+            'content' => $modal
+        );
+        return $data;
+    }
+   
+    public function modalAgregarProducto($datos) {
+        $lng = $datos;
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Producto</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarProducto" method="POST" enctype="multipart/form-data" method="POST">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Orden</label>
+                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Header Text</label>
+                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Nombre</label>
+                                                            <input type="text" name="es_nombre" class="form-control" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Header Text</label>
+                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Nombre</label>
+                                                            <input type="text" name="en_nombre" class="form-control" value="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <h3>Imagen Cabecera</h3>
+                                    <div class="alert alert-info alert-dismissable">
+                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                        Detalles de la imagen a subir:<br>
+                                            -Formato: JPG, PNG<br>
+                                            -Dimensión: Hasta 1400 x 788<br>
+                                            -Tamaño: 2MB<br>
+                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                                    </div>
+                                    <div class="html5fileupload fileProductoHeaderAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                        <input type="file" name="file_archivo" />
+                                    </div>
+                                    <script>
+                                        $(".html5fileupload.fileProductoHeaderAgregar").html5fileupload();
                                     </script>
                                 </div>
                             </div>
@@ -2338,6 +2599,14 @@ class Admin_Model extends Model {
         );
         $this->db->update('certificaciones', $update, "id = $id");
     }
+    
+    public function frmAddProductoImg($imagenes) {
+        $id = $imagenes['id'];
+        $update = array(
+            'imagen_header' => $imagenes['imagen_header']
+        );
+        $this->db->update('productos', $update, "id = $id");
+    }
 
     public function frmAddHeaderImgLogisticaImg($imagenes) {
         $id = $imagenes['id'];
@@ -2375,6 +2644,21 @@ class Admin_Model extends Model {
             'en_contenido' => utf8_decode($datos['en_contenido']),
             'es_menu' => utf8_decode($datos['es_menu']),
             'en_menu' => utf8_decode($datos['en_menu']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => $datos['estado']
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+    
+    public function frmAgregarProducto($datos) {
+        $this->db->insert('productos', array(
+            'es_nombre' => utf8_decode($datos['es_nombre']),
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_nombre' => utf8_decode($datos['en_nombre']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
             'orden' => utf8_decode($datos['orden']),
             'estado' => $datos['estado']
         ));
@@ -3046,6 +3330,32 @@ class Admin_Model extends Model {
             'id' => $id,
             'content' => $this->rowDataTable('certificacion', 'certificaciones', $id),
             'mensaje' => 'Se ha actualizado el contenido de la sección'
+        );
+        return $data;
+    }
+
+    public function frmEditarProducto($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_nombre' => utf8_decode($datos['es_nombre']),
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_nombre' => utf8_decode($datos['en_nombre']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => $estado
+        );
+        $this->db->update('productos', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'id' => $id,
+            'content' => $this->rowDataTable('productos', 'productos', $id),
+            'mensaje' => 'Se ha actualizado el contenido del producto'
         );
         return $data;
     }
