@@ -63,6 +63,18 @@ $helper = new Helper();
         <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://themes.muffingroup.com/rocco/wp-content/themes/rocco/css/ie8.css" />
         <![endif]-->
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122995300-1"></script>
+        <script>
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag() {
+                        dataLayer.push(arguments);
+                    }
+                    gtag('js', new Date());
+
+                    gtag('config', 'UA-122995300-1');
+        </script>
+
     </head>
     <!-- body -->
     <body class="page page-child page-template-default template-slider  sticky-header layout-full-width">

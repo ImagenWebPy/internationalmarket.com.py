@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "international-market-209619",
+  "private_key_id": "d215e30f9ba1a1da139c6dcf7ee9de5e5df88758",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDJM6e0THBURDG8\nZo0j7n/P0pvQ+FnLNSNv2x3+ni5Q6zPnTM+cKeknCJsKhCL8xUzKBTCy7JWHcIUz\n2VepDTO7nE2yvmxZKrqVPt2Z6lNhqFyu0iNY74wW0HdHwZTZlyou954Vlj/whuuw\nvAo9Ei20IItdfCrMzM3ZEhGAY7oeU4V4cYXI3E2WkBi5cFtzoI2NxcZ0oWOfB6AB\njcLFoHXKkXK+W2f3XRw8W+YX/ofme1hLv8awdXBtsiTchMJraTE+Hp4Hsddh0Jjg\nOKFyOZVyWEuh92pIvmkwaNHNJ4gj/qz+vEEqkToRkVEbseLIeOhIFPdu7esTQFgq\n1ER/PQwJAgMBAAECggEAIf/PFooWLz8o0mfX8Nr0ESfLOchF0C9mEhhKXMTZGcZt\nCmhx6rcwVW7AWEoU6Xbjr32qCYouCGmMsMLI6+G1vL3AaXSBNZ4hUmgBpWkx9t4u\n70HGRFiSaSaICYGeSBihwbcJKSevHVOHT2GvLzu7qmUXd9AsIVh4bnZ9q57ujAIP\nX+LkOkE5fbk7w+A87DWR3DE1OAroS5KOmtEPaiACqUjBbrU5LEipIZKrW+3zJD+d\nP2ykFD65L1Gaxfu/I3aXnYDuwcMbIyJqCXwgs43dx37Ryg/Y0UcLr/p6sKSWEqBp\ngkVG0uetNQybaTslwomn7PG8YcNyk4eYaMXvY4bzswKBgQDpWgALxuBeEkxUIglQ\nWvESFwh/ag1VkZlASyMzAAmpDVetyeRTw0mWfyeOzdUAm+XzQAuZBFoJZVwloD4F\nmPhgYZxhlldl+TAp+dACkDWrwwPvzifW70hRRnrqsAasuKPcfn+SQzkUdyiPZVBX\n82bLhe6e3s8MrPQZ4SO7akCaVwKBgQDcutdS5E3XkctGcadbcBl07W2BczjpXhky\nwSlVgNTt7Vr+bC4ghjBQyT20YE/ae1pPU8Jt8BikRyLH8IYwS0N4wHqxt9lmOfoh\nq9cNx0qbHcDQLH4svtclv42zckJBRpyoYOtqiI50qrLnGFKn3Keg6UUp8AuJKMUq\nV3V4TO5QnwKBgQC1zROqGTimsdTb22SsQR3+PQm20vYui2/9Yky7KDVeivGbiWal\nR8mmQcyc+ooPnmYp/OTMQ1KubVS8T7rie4pO9N10PkA7R0gZ+/HufVIDTr1bcJ8j\nWmtaPvH2tEuO949acweK+WqYIjnsdj+BNjYJLIB7MBXZx0mqe/htxFsuowKBgGBZ\nUmpFa9EgO8n5DGN2cDZA+V7bK8l6IKet91vyS3+77s9F63CZAngRD9UvgUvOMmKU\nHjec6TS0NHNwAzMLd107L5NpvATKY+vUtZ+3EVLaTvLPqRfhCcrZbYIZ6t/Rccpx\n2/D5wK0eYc9MJ7BMOgOcL2uZ838gg8fyuz0S36fjAoGAdpfRz/zuUe4M0z/bGjUv\nt39r5fv6h7/OuNOE9Y2fOMfZefe62f4l5ewBSC7j1g8HYtIrCd6csD/vwQD+XbrD\nbihvWlCHoc74g3QP5tq8nvs/cSbTtVk2FUxdz60s58Zo3Hk1WTxr1xstcOdUCrFA\nn9O9g+IRh+WfE9BtxWdkmJ8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "analytics@international-market-209619.iam.gserviceaccount.com",
+  "client_id": "113421913123695077641",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/analytics%40international-market-209619.iam.gserviceaccount.com"
+}

@@ -185,7 +185,7 @@ class Admin extends Controller {
         if (!empty($_SESSION['message']))
             unset($_SESSION['message']);
     }
-    
+
     public function products() {
         $this->view->helper = $this->helper;
         $this->view->idioma = $this->idioma;
@@ -484,7 +484,7 @@ class Admin extends Controller {
             echo json_encode($response);
         }
     }
-    
+
     public function uploadImgCertificacion() {
         if (!empty($_POST)) {
             $this->model->unlinkImagenNeoPure();
@@ -579,7 +579,42 @@ class Admin extends Controller {
             echo json_encode($response);
         }
     }
-    
+
+    public function uploadImgSlider() {
+        if (!empty($_POST)) {
+            $idPost = $_POST['data']['id'];
+            $this->model->unlinkImagenSlider($idPost);
+            $error = false;
+            $absolutedir = dirname(__FILE__);
+            $dir = 'public/images/slider/';
+            $serverdir = $dir;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            $filename = $this->helper->cleanUrl($name);
+            $filename = $filename . '.' . $extension;
+            $handle = fopen($serverdir . $filename, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #REDIMENSIONAR
+            $imagen = $serverdir . $filename;
+            $imagen_final = $filename;
+            $ancho = 1920;
+            $alto = 755;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdir);
+            #############
+            header('Content-type: application/json; charset=utf-8');
+            $data = array(
+                'id' => $idPost,
+                'imagen' => $filename
+            );
+            $response = $this->model->uploadImgSlider($data);
+            echo json_encode($response);
+        }
+    }
+
     public function uploadImgCertificacionHeader() {
         if (!empty($_POST)) {
             $idPost = $_POST['data']['id'];
@@ -614,7 +649,7 @@ class Admin extends Controller {
             echo json_encode($response);
         }
     }
-    
+
     public function uploadImgProductoHeader() {
         if (!empty($_POST)) {
             $idPost = $_POST['data']['id'];
@@ -859,7 +894,7 @@ class Admin extends Controller {
         $datos = $this->model->modalEditarCertificaciones($data);
         echo $datos;
     }
-   
+
     public function modalEditarProductos() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
@@ -1186,7 +1221,7 @@ class Admin extends Controller {
         $datos = $this->model->modalAgregarCertificacion($this->idioma);
         echo json_encode($datos);
     }
-   
+
     public function modalAgregarProducto() {
         header('Content-type: application/json; charset=utf-8');
         $datos = $this->model->modalAgregarProducto($this->idioma);
@@ -1353,7 +1388,7 @@ class Admin extends Controller {
         }
         header('Location:' . URL . $this->idioma . '/admin/certifications/');
     }
-    
+
     public function frmAgregarProducto() {
         if (!empty($_POST)) {
             $data = array(
@@ -1367,7 +1402,7 @@ class Admin extends Controller {
                 'estado' => (!empty($_POST['estado'])) ? $_POST['estado'] : 0,
             );
             $idPost = $this->model->frmAgregarProducto($data);
-            #IMAGEN CERTIFICACION
+            #IMAGEN PRODUCTO HEADER
             if (!empty($_FILES['file_archivo']['name'])) {
                 $error = false;
 
@@ -1398,6 +1433,66 @@ class Admin extends Controller {
                     'imagen_header' => $fnameHeader
                 );
                 $this->model->frmAddProductoImg($imagenes);
+            }
+            if (!empty($_FILES['file_productos']['name'])) {
+                $dir = 'public/images/productos/';
+                $dirThumb = 'public/images/productos/thumb/';
+                $serverdir = $dir;
+                $serverdirThumb = $dirThumb;
+                #IMAGENES
+                $filename = array();
+                $filenameThumb = array();
+                #IMAGENES
+                $cantImagenes = count($_FILES['file_productos']['name']) - 1;
+                for ($i = 0; $i <= $cantImagenes; $i++) {
+                    $newname = $idPost . '_' . $_FILES['file_productos']['name'][$i];
+
+                    $fname = $this->helper->cleanUrl($newname);
+
+
+                    $contents = file_get_contents($_FILES['file_productos']['tmp_name'][$i]);
+
+                    $handle = fopen($serverdir . $fname, 'w');
+                    fwrite($handle, $contents);
+                    fclose($handle);
+                    #############
+                    #SE REDIMENSIONA LA IMAGEN
+                    #############
+                    # ruta de la imagen a redimensionar 
+                    $imagen = $serverdir . $fname;
+                    # ruta de la imagen final, si se pone el mismo nombre que la imagen, esta se sobreescribe 
+                    $imagen_final = $fname;
+                    $ancho = 1180;
+                    $alto = 785;
+                    $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdir);
+                    #############
+                    array_push($filename, $fname);
+                    #THUMB DE LA IMAGEN
+                    $newnameThumb = $idPost . '_thumb-' . $_FILES['file_productos']['name'][$i];
+                    $fnameThumb = $this->helper->cleanUrl($newnameThumb);
+                    $contents = file_get_contents($_FILES['file_productos']['tmp_name'][$i]);
+                    $handle = fopen($serverdirThumb . $fnameThumb, 'w');
+                    fwrite($handle, $contents);
+                    fclose($handle);
+                    #############
+                    #SE REDIMENSIONA LA IMAGEN
+                    #############
+                    # ruta de la imagen a redimensionar 
+                    $imagen = $serverdirThumb . $fnameThumb;
+                    # ruta de la imagen final, si se pone el mismo nombre que la imagen, esta se sobreescribe 
+                    $imagen_final = $fnameThumb;
+                    $ancho = 270;
+                    $alto = 203;
+                    $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdirThumb);
+                    #############
+                    array_push($filenameThumb, $fnameThumb);
+                }
+                $imagenes = array(
+                    'id' => $idPost,
+                    'imagenes' => $filename,
+                    'thumb' => $filenameThumb
+                );
+                $this->model->insertProductoImagen($imagenes);
             }
             Session::set('message', array(
                 'type' => 'success',
@@ -1471,9 +1566,28 @@ class Admin extends Controller {
         echo $data;
     }
 
+    public function btnMostrarImg() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->btnMostrarImg($data);
+        echo json_encode($datos);
+    }
+
+    public function btnEliminarImg() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->btnEliminarImg($data);
+        echo json_encode($datos);
+    }
+
     public function modalEditarDTSlider() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
+            'lng' => $this->idioma,
             'id' => $this->helper->cleanInput($_POST['id'])
         );
         $datos = $this->model->modalEditarDTSlider($data);
@@ -1604,7 +1718,7 @@ class Admin extends Controller {
         $datos = $this->model->frmEditarCertificacion($data);
         echo json_encode($datos);
     }
-   
+
     public function frmEditarProducto() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
@@ -1726,6 +1840,131 @@ class Admin extends Controller {
         );
         $datos = $this->model->frmEditarIndexSeccionItem5($data);
         echo json_encode($datos);
+    }
+
+    public function uploadProductoImagen() {
+        if (!empty($_POST)) {
+            $idPost = $_POST['data']['id'];
+            $idInsertDB = $this->model->insertProductoImagenes($idPost);
+            $error = false;
+            $dir = 'public/images/productos/';
+            $serverdir = $dir;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            #insertamos la imagen para obtene
+
+            $filename = $this->helper->cleanUrl($idInsertDB . '_' . $name);
+            $filename = $filename . '.' . $extension;
+            //$filename				= $file.'.'.substr(sha1(time()),0,6).'.'.$extension;
+
+            $handle = fopen($serverdir . $filename, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #############
+            #SE REDIMENSIONA LA IMAGEN
+            #############
+            # ruta de la imagen a redimensionar 
+            $imagen = $serverdir . $filename;
+            # ruta de la imagen final, si se pone el mismo nombre que la imagen, esta se sobreescribe 
+            $imagen_final = $filename;
+            $ancho = 1180;
+            $alto = 785;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdir);
+            $dataImagen = array(
+                'id' => $idInsertDB,
+                'archivo' => $filename
+            );
+            $uploadImagen = $this->model->uploadProductoImagen($dataImagen);
+            ###################################################
+            $dirThumb = 'public/images/productos/thumb/';
+            $serverdirThumb = $dirThumb;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            #insertamos la imagen para obtene
+
+            $filenameThumb = $this->helper->cleanUrl($idInsertDB . '_thumb-' . $name);
+            $filenameThumb = $filenameThumb . '.' . $extension;
+            //$filename				= $file.'.'.substr(sha1(time()),0,6).'.'.$extension;
+
+            $handle = fopen($serverdirThumb . $filenameThumb, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #############
+            #SE REDIMENSIONA LA IMAGEN
+            #############
+            # ruta de la imagen a redimensionar 
+            $imagen = $serverdirThumb . $filenameThumb;
+            # ruta de la imagen final, si se pone el mismo nombre que la imagen, esta se sobreescribe 
+            $imagen_final = $filenameThumb;
+            $ancho = 270;
+            $alto = 203;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdirThumb);
+            $dataImagenThumb = array(
+                'id' => $idInsertDB,
+                'archivo' => $filenameThumb
+            );
+            $response = $this->model->uploadProductoImagenMiniatura($dataImagenThumb);
+            header('Content-type: application/json; charset=utf-8');
+            echo json_encode($response);
+            //echo json_encode(array('result'=>true));
+        }
+    }
+
+    public function rptVisitasPaginas() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'fechaInicio' => $this->helper->cleanInput($_POST['fechaInicio']),
+            'fechaFin' => $this->helper->cleanInput($_POST['fechaFin']),
+            'mostrar' => $_POST['mostrar']
+        );
+        $data = $this->model->rptVisitasPaginas($datos);
+        echo json_encode($data);
+    }
+
+    public function rptCantidadVisitasDia() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'fechaInicio' => $this->helper->cleanInput($_POST['fechaInicio']),
+            'fechaFin' => $this->helper->cleanInput($_POST['fechaFin'])
+        );
+        $data = $this->model->rptCantidadVisitasDia($datos);
+        echo json_encode($data);
+    }
+
+    public function rptUsuarios() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'fechaInicio' => $this->helper->cleanInput($_POST['fechaInicio']),
+            'fechaFin' => $this->helper->cleanInput($_POST['fechaFin'])
+        );
+        $data = $this->model->rptUsuarios($datos);
+        echo json_encode($data);
+    }
+
+    public function rptDispositivos() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'fechaInicio' => $this->helper->cleanInput($_POST['fechaInicio']),
+            'fechaFin' => $this->helper->cleanInput($_POST['fechaFin'])
+        );
+        $data = $this->model->rptDispositivos($datos);
+        echo json_encode($data);
+    }
+
+    public function rptPaginasSesion() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'fechaInicio' => $this->helper->cleanInput($_POST['fechaInicio']),
+            'fechaFin' => $this->helper->cleanInput($_POST['fechaFin'])
+        );
+        $data = $this->model->rptPaginasSesion($datos);
+        echo json_encode($data);
     }
 
 }
