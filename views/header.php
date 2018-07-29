@@ -88,10 +88,16 @@ $helper = new Helper();
                 <div class="container">
                     <div class="column one">
                         <div class="addons">
-                            <form method="get" id="searchform" action="#">
+                            <form method="post" id="searchform" action="<?= URL. $this->idioma;?>/blog/busqueda">
+                                <input type="hidden" name="url" value="<?= URL; ?>">
+                                <input type="hidden" name="lng" value="<?= $this->idioma; ?>">
                                 <a class="icon" href="#"><i class="fa fa-search"></i></a>
-                                <input type="text" class="field" name="s" id="s" placeholder="Enter your search"/>
-                                <input type="submit" class="submit" value="" style="display:none;"/>
+                                <?php if ($this->idioma == 'en'): ?>
+                                    <input type="text" class="field" name="busqueda" placeholder="Enter your search"/>
+                                <?php else: ?>
+                                    <input type="text" class="field" name="busqueda" placeholder="Ingrese su Busqueda"/>
+                                <?php endif; ?>
+                                <input type="submit" class="submit btnSubmitSearch" value="" style="display:none;"/>
                             </form>
                             <!-- .social -->
                             <?= $helper->cargarRedesSociales(); ?>

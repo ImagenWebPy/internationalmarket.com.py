@@ -138,7 +138,7 @@
         $("#Header #searchform .icon").click(function (e) {
             e.preventDefault();
             if ($(this).parent().hasClass('focus')) {
-                $('#searchform').submit();
+
             } else {
                 $(this).parent().addClass('focus');
             }
@@ -441,4 +441,26 @@
         }
         e.handled = true;
     });
+
+//    $(document).on('submit', '#searchform', function (e) {
+//        if (e.handled !== true) // This will prevent event triggering more then once
+//        {
+//            e.preventDefault();
+//            var url = $("input[name='url']").val();
+//            var lng = $("input[name='lng']").val();
+//            $.ajax({
+//                type: "POST",
+//                url: url + lng + '/blog/busqueda/',
+//                dataType: "json",
+//                data: $("#searchform").serialize(), // serializes the form's elements.
+//                success: function (data)
+//                {
+//                    if (data.type == 'success') {
+//                        toastr.success(data.content)
+//                    }
+//                }
+//            });
+//        }
+//        e.handled = true;
+//    });
 })(jQuery);

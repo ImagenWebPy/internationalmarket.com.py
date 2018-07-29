@@ -52,4 +52,26 @@ class Blog extends Controller {
         $this->view->render('footer');
     }
 
+    public function busqueda() {
+        $datos = array(
+            'lng' => $this->helper->cleanInput($_POST['lng']),
+            'busqueda' => $this->helper->cleanInput($_POST['busqueda'])
+        );
+        $metas = $this->helper->getMetaTags($this->idioma, $this->url);
+        $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
+        $this->view->dataHeader = $this->model->dataHeader($this->idioma);
+        
+        $this->view->title = SITE_TITLE . $metas['title'];
+        $this->view->description = $metas['description'];
+        $this->view->keywords = $metas['keywords'];
+        $this->view->resultadosBusquedas = $this->model->resultadosBusquedas($datos);
+        
+        $this->view->subHeader = utf8_encode($this->view->dataHeader['titulo']);
+        $this->view->Breadcrumbs = $this->helper->Breadcrumbs($this->url);
+        $this->view->render('header');
+        $this->view->render('blog/busqueda');
+        $this->view->render('footer');
+    }
+
 }
