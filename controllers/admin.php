@@ -32,6 +32,20 @@ class Admin extends Controller {
             unset($_SESSION['message']);
     }
 
+    public function menu() {
+        $this->view->helper = $this->helper;
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Menú';
+        $this->view->getMenu = $this->model->getMenu();
+        $this->view->public_css = array("css/plugins/iCheck/custom.css", "css/plugins/summernote/summernote.css", "css/plugins/toastr/toastr.min.css");
+        $this->view->public_js = array("js/plugins/iCheck/icheck.min.js", "js/plugins/summernote/summernote.min.js", "js/plugins/toastr/toastr.min.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/menu/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
+
     public function direccion() {
         $this->view->helper = $this->helper;
         $this->view->idioma = $this->idioma;
@@ -260,6 +274,15 @@ class Admin extends Controller {
         echo $datos;
     }
 
+    public function modalEditarMenu() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->modalEditarMenu($data);
+        echo $datos;
+    }
+
     public function frmEditarRedes() {
         header('Content-type: application/json; charset=utf-8');
         $datos = array(
@@ -271,6 +294,19 @@ class Admin extends Controller {
             'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
         );
         $data = $this->model->frmEditarRedes($datos);
+        echo json_encode($data);
+    }
+
+    public function frmEditarMenu() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'es_texto' => (!empty($_POST['es_texto'])) ? $this->helper->cleanInput($_POST['es_texto']) : NULL,
+            'en_texto' => (!empty($_POST['en_texto'])) ? $this->helper->cleanInput($_POST['en_texto']) : NULL,
+            'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
+        );
+        $data = $this->model->frmEditarMenu($datos);
         echo json_encode($data);
     }
 

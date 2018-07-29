@@ -11,6 +11,11 @@ class Admin_Model extends Model {
         return $sql;
     }
 
+    public function getMenu() {
+        $sql = $this->db->select("select * from menu order by orden asc");
+        return $sql;
+    }
+
     public function modalEditarRedes($datos) {
         $id = $datos['id'];
         $sql = $this->db->select("SELECT * FROM redes where id = $id");
@@ -66,6 +71,60 @@ class Admin_Model extends Model {
                         $(".i-checks").iCheck({
                             checkboxClass: "icheckbox_square-green",
                             radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Editar Red Social',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function modalEditarMenu($datos) {
+        $id = $datos['id'];
+        $sql = $this->db->select("SELECT * FROM menu where id = $id");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarMenu" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Es Nombre</label>
+                                    <input type="text" name="es_texto" class="form-control" value="' . utf8_encode($sql[0]['es_texto']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>En Nombre</label>
+                                    <input type="text" name="en_texto" class="form-control" value="' . utf8_encode($sql[0]['en_texto']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Orden</label>
+                                    <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                            </div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Red Social</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green"
                         });
                     });
                 </script>';
@@ -208,6 +267,28 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function frmEditarMenu($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_texto' => utf8_decode($datos['es_texto']),
+            'en_texto' => utf8_decode($datos['en_texto']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => $estado
+        );
+        $this->db->update('menu', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => $this->rowDataTable('menu', 'menu', $id),
+            'mensaje' => 'Se ha editado satisfactoriamente los datos del menú ',
+            'id' => $id
+        );
+        return $data;
+    }
+
     public function frmAgregarRedes($datos) {
         $this->db->insert('redes', array(
             'descripcion' => utf8_decode($datos['descripcion']),
@@ -316,6 +397,19 @@ class Admin_Model extends Model {
                         . '<td>' . utf8_encode($sql[0]['en_header_text']) . '</td>'
                         . '<td>' . utf8_encode($sql[0]['es_menu']) . '</td>'
                         . '<td>' . utf8_encode($sql[0]['en_menu']) . '</td>'
+                        . '<td>' . $estado . '</td>'
+                        . '<td>' . $btnEditar . '</td>';
+                break;
+            case 'menu':
+                if ($sql[0]['estado'] == 1) {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                } else {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                }
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMenu"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['orden']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
