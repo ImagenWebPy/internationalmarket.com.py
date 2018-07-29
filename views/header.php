@@ -1,11 +1,11 @@
 <?php
 $lngTxt = 'Languages';
-$classLngEng = 'class="font-bold"';
-$classLngEs = '';
+$classLngEng = 'class="font-bold changeLng"';
+$classLngEs = 'class="changeLng"';
 if ($this->idioma == 'es') {
     $lngTxt = 'Idiomas';
-    $classLngEs = 'class="font-bold"';
-    $classLngEng = '';
+    $classLngEs = 'class="font-bold changeLng"';
+    $classLngEng = 'class="changeLng"';
 }
 $helper = new Helper();
 ?>
@@ -66,13 +66,13 @@ $helper = new Helper();
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122995300-1"></script>
         <script>
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag() {
-                        dataLayer.push(arguments);
-                    }
-                    gtag('js', new Date());
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
 
-                    gtag('config', 'UA-122995300-1');
+            gtag('config', 'UA-122995300-1');
         </script>
 
     </head>
@@ -100,8 +100,8 @@ $helper = new Helper();
                                 <div class="language_select">
                                     <span class="arrow"></span>
                                     <ul id="menu-languages" class="">
-                                        <li class="menu-item"><a href="#" <?= $classLngEng; ?>>English</a></li>
-                                        <li class="menu-item"><a href="#" <?= $classLngEs; ?>>Español</a></li>
+                                        <li class="menu-item"><a href="#" <?= $classLngEng; ?> class="changeLng" data-url="<?= URL; ?>" data-lng="en" data-page="<?= $this->page; ?>">English</a></li>
+                                        <li class="menu-item"><a href="#" <?= $classLngEs; ?> class="changeLng" data-url="<?= URL; ?>" data-lng="es" data-page="<?= $this->page; ?>">Español</a></li>
                                     </ul>
                                 </div>
                             </div>

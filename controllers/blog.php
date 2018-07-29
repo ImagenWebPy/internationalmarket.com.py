@@ -18,6 +18,7 @@ class Blog extends Controller {
 
         $metas = $this->helper->getMetaTags($this->idioma, $this->url);
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . $metas['title'];
         $this->view->description = $metas['description'];
         $this->view->keywords = $metas['keywords'];
@@ -39,6 +40,7 @@ class Blog extends Controller {
         $this->view->post = $this->model->post($lng, $id);
 
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . $this->view->post['titulo'];
         $this->view->description = $this->view->post['description'];
         $this->view->keywords = $this->view->post['keywords'];

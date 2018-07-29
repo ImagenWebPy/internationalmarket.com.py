@@ -11,6 +11,7 @@ class Quality extends Controller {
         $lng = $url[0];
 
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . 'Qaulity';
         $this->view->description = '';
         $this->view->keywords = '';

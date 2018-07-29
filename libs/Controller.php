@@ -5,6 +5,7 @@ class Controller {
     public $helper = '';
     public $idioma = '';
     public $url = '';
+    public $page = '';
 
     function __construct() {
         //echo 'Main controller<br />';
@@ -18,6 +19,9 @@ class Controller {
             }
         }
         $this->idioma = $lng;
+        $page = $this->helper->getPage();
+        $page = implode(',', $page);
+        $this->page = $page;
     }
 
     /**

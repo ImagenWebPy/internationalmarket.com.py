@@ -10,6 +10,7 @@ class Index extends Controller {
         $metas = $this->helper->getMetaTags($this->idioma, $this->url);
         $lng = $this->idioma;
         $this->view->idioma = $lng;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . $metas['title'];
         $this->view->description = $metas['description'];
         $this->view->keywords = $metas['keywords'];

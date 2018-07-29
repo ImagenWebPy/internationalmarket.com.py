@@ -241,7 +241,6 @@ $footer = $helper->footer_content($this->idioma);
 
         }
     });	/*ready*/
-
 </script>
 
 </body>
