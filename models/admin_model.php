@@ -2987,11 +2987,11 @@ id = 1;");
             <div class="row">
                 <div class="tabs-container">
                     <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                        <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                        <li class="active"><a data-toggle="tab" href="#slider-1"> ES Contenido</a></li>
+                        <li class=""><a data-toggle="tab" href="#slider-2">EN Contenido</a></li>
                     </ul>
                     <div class="tab-content">
-                        <div id="tab-1" class="tab-pane active">
+                        <div id="slider-1" class="tab-pane active">
                             <div class="panel-body">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -3013,7 +3013,7 @@ id = 1;");
                                 </div>
                             </div>
                         </div>
-                        <div id="tab-2" class="tab-pane">
+                        <div id="slider-2" class="tab-pane">
                             <div class="panel-body">
                                 <div class="col-md-6">
                                     <div class="form-group">

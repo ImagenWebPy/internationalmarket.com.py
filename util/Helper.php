@@ -41,6 +41,8 @@ class Helper {
         $String = str_replace("Ñ", "N", $String);
         $String = str_replace("Ý", "Y", $String);
         $String = str_replace("ý", "y", $String);
+        $String = str_replace("(", "_", $String);
+        $String = str_replace(")", "_", $String);
 
         $String = str_replace("'", "", $String);
         //$String = str_replace(".", "_", $String);
