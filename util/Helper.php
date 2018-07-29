@@ -1056,7 +1056,7 @@ class Helper {
 
     public function getLogos() {
         $sql = $this->db->select("select logo from logo where id = 1");
-        return $sql[0];
+        return $sql[0]['logo'];
     }
 
 }

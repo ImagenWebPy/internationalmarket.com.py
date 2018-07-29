@@ -3,7 +3,7 @@
         <h2>Busquedas</h2>
         <ol class="breadcrumb">
             <li>
-                <a href="<?= URL; ?>admin">Inicio</a>
+                <a href="<?= URL . $this->idioma; ?>/admin">Inicio</a>
             </li>
             <li class="active">
                 <a>Contacto</A>
@@ -61,7 +61,7 @@
         $('.dataTables-busquedas').DataTable({
             "processing": true,
             "serverSide": true,
-            ajax: '<?= URL; ?>admin/listadoDTBusqueda',
+            ajax: '<?= URL . $this->idioma; ?>/admin/listadoDTBusqueda',
             type: "post",
             pageLength: 25,
             responsive: true,

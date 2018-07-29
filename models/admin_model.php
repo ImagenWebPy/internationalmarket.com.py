@@ -76,6 +76,56 @@ class Admin_Model extends Model {
         return json_encode($data);
     }
 
+    public function listadoDTBusqueda($datos) {
+        $columns = array(
+            0 => 'id',
+            1 => 'busqueda',
+            2 => 'cantidad',
+            3 => 'fecha',
+            4 => 'ip'
+        );
+        #getting total number records without any search
+        $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog_busquedas");
+        $totalFiltered = $sql[0]['cantidad'];
+        $totalData = $sql[0]['cantidad'];
+
+        $query = "SELECT * FROM blog_busquedas where 1 = 1";
+        $where = "";
+        if (!empty($datos['search']['value'])) {
+            $where .= " AND (busqueda LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR cantidad LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR fecha LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR ip LIKE '%" . $requestData['search']['value'] . "%' )";
+            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+            $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog_busquedas where 1 = 1 $where");
+            $totalFiltered = $sql[0]['cantidad'];
+        }
+        $query .= $where;
+        $query .= " ORDER BY " . $columns[$datos['order'][0]['column']] . "   " . $datos['order'][0]['dir'] . "  LIMIT " . $datos['start'] . " ," . $datos['length'] . "   ";
+        $sql = $this->db->select($query);
+        $data = array();
+        foreach ($sql as $row) {  // preparing an array
+            $id = $row["id"];
+            $nestedData = array();
+            $nestedData['DT_RowId'] = 'contacto_' . $id;
+            $nestedData[] = $id;
+            $nestedData[] = utf8_encode($row["busqueda"]);
+            $nestedData[] = number_format($row["cantidad"], 0, ',', '.');
+            $nestedData[] = date('d-m-Y H:i:s', strtotime($row["fecha"]));
+            $nestedData[] = utf8_encode($row["ip"]);
+            $data[] = $nestedData;
+        }
+
+        $json_data = array(
+            "draw" => intval($datos['draw']), // for every request/draw by clientside , they send a number as a parameter, when they recieve a response/data they first check the draw number, so we are sending same number in draw. 
+            "recordsTotal" => intval($totalData), // total number of records
+            "recordsFiltered" => intval($totalFiltered), // total number of records after searching, if there is no searching then totalFiltered = totalData
+            "data" => $data   // total data array
+        );
+
+        return json_encode($json_data);
+    }
+
     public function modalAgregarRedes($datos) {
         $modal = '<div class="box box-primary">
                     <div class="box-header with-border">
@@ -1154,8 +1204,8 @@ class Admin_Model extends Model {
     public function unlinkLogoCabecera() {
         $logo = $this->helper->getLogos();
         $dir = 'public/images/';
-        if (file_exists($dir . $logo['logo'])) {
-            unlink($dir . $logo['logo']);
+        if (file_exists($dir . $logo)) {
+            unlink($dir . $logo);
         }
     }
 

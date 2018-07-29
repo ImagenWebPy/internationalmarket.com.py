@@ -8,6 +8,7 @@ if ($this->idioma == 'es') {
     $classLngEng = 'class="changeLng"';
 }
 $helper = new Helper();
+$logo = $helper->getLogos();
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
@@ -88,7 +89,7 @@ $helper = new Helper();
                 <div class="container">
                     <div class="column one">
                         <div class="addons">
-                            <form method="post" id="searchform" action="<?= URL. $this->idioma;?>/blog/busqueda">
+                            <form method="post" id="searchform" action="<?= URL . $this->idioma; ?>/blog/busqueda">
                                 <input type="hidden" name="url" value="<?= URL; ?>">
                                 <input type="hidden" name="lng" value="<?= $this->idioma; ?>">
                                 <a class="icon" href="#"><i class="fa fa-search"></i></a>
@@ -115,7 +116,7 @@ $helper = new Helper();
                         <!-- .logo -->
                         <div class="logo">
                             <h1><a id="logo" href="<?= $helper->urlInicio($this->idioma); ?>" title="International Market">
-                                    <img class="scale-with-grid" src="<?= URL; ?>public/images/logo-short.png" alt="International Market Logo"/>
+                                    <img class="scale-with-grid" src="<?= URL; ?>public/images/<?= $logo; ?>" alt="International Market Logo" style="width: 270px;"/>
                                 </a>
                             </h1>
                         </div>

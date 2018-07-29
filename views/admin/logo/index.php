@@ -51,7 +51,7 @@ if (isset($_SESSION['message'])) {
                     </script>
                     <div class="row">
                         <div class="col-md-12" id="imgLogoCabecera">
-                            <img class="img-responsive" src="<?= URL ?>public/images/<?= $this->logos['logo']; ?>">';
+                            <img class="img-responsive" src="<?= URL ?>public/images/<?= $this->logos; ?>">';
                         </div>
                     </div>
                 </div>
