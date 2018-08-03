@@ -219,6 +219,7 @@ class Admin extends Controller {
         $this->view->helper = $this->helper;
         $this->view->idioma = $this->idioma;
         $this->view->title = 'Neo Pure';
+        $this->view->galeria = $this->model->galeria();
         $this->view->datosNeoPure = $this->model->datosNeoPure();
         $this->view->public_css = array("css/plugins/toastr/toastr.min.css", "css/plugins/iCheck/custom.css", "css/plugins/summernote/summernote.css", "css/plugins/html5fileupload/html5fileupload.css");
         $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
@@ -332,6 +333,15 @@ class Admin extends Controller {
             'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
         );
         $data = $this->model->frmAgregarIndexSeccionItem5($datos);
+        echo json_encode($data);
+    }
+    
+    public function frmAgregarVideoNeo() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'id_youtube' => (!empty($_POST['id_youtube'])) ? $this->helper->cleanInput($_POST['id_youtube']) : NULL
+        );
+        $data = $this->model->frmAgregarVideoNeo($datos);
         echo json_encode($data);
     }
 
@@ -543,7 +553,8 @@ class Admin extends Controller {
 
     public function uploadImgCertificacion() {
         if (!empty($_POST)) {
-            $this->model->unlinkImagenNeoPure();
+            $idPost = $_POST['data']['id'];
+            $this->model->unlinkImgCertificacion($idPost);
             $error = false;
             $absolutedir = dirname(__FILE__);
             $dir = 'public/images/certificaciones/';
@@ -561,6 +572,7 @@ class Admin extends Controller {
             #############
             header('Content-type: application/json; charset=utf-8');
             $data = array(
+                'id' => $idPost,
                 'imagen' => $filename
             );
             $response = $this->model->uploadImgCertificacion($data);
@@ -674,7 +686,7 @@ class Admin extends Controller {
     public function uploadImgCertificacionHeader() {
         if (!empty($_POST)) {
             $idPost = $_POST['data']['id'];
-            $this->model->unlinkImagenNeoPure();
+            $this->model->unlinkImagenCertificacionHeader($idPost);
             $error = false;
             $absolutedir = dirname(__FILE__);
             $dir = 'public/images/header/';
@@ -1630,6 +1642,15 @@ class Admin extends Controller {
         $datos = $this->model->btnMostrarImg($data);
         echo json_encode($datos);
     }
+    
+    public function btnMostrarImgNeo() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->btnMostrarImgNeo($data);
+        echo json_encode($datos);
+    }
 
     public function btnEliminarImg() {
         header('Content-type: application/json; charset=utf-8');
@@ -1637,6 +1658,15 @@ class Admin extends Controller {
             'id' => $this->helper->cleanInput($_POST['id'])
         );
         $datos = $this->model->btnEliminarImg($data);
+        echo json_encode($datos);
+    }
+    
+    public function btnEliminarImgNeo() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id'])
+        );
+        $datos = $this->model->btnEliminarImgNeo($data);
         echo json_encode($datos);
     }
 
@@ -2021,6 +2051,79 @@ class Admin extends Controller {
         );
         $data = $this->model->rptPaginasSesion($datos);
         echo json_encode($data);
+    }
+
+    public function uploadNeoImagen() {
+        if (!empty($_POST)) {
+            $idInsertDB = $this->model->insertNeoImagenes();
+            $error = false;
+            $dir = 'public/images/neopure/';
+            $serverdir = $dir;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            #insertamos la imagen para obtene
+
+            $filename = $this->helper->cleanUrl($idInsertDB . '_' . $name);
+            $filename = $filename . '.' . $extension;
+            //$filename				= $file.'.'.substr(sha1(time()),0,6).'.'.$extension;
+
+            $handle = fopen($serverdir . $filename, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #############
+            #SE REDIMENSIONA LA IMAGEN
+            #############
+            # ruta de la imagen a redimensionar 
+            $imagen = $serverdir . $filename;
+            # ruta de la imagen final, si se pone el mismo nombre que la imagen, esta se sobreescribe 
+            $imagen_final = $filename;
+            $ancho = 1180;
+            $alto = 785;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdir);
+            $dataImagen = array(
+                'id' => $idInsertDB,
+                'archivo' => $filename
+            );
+            $uploadImagen = $this->model->uploadNeoImagen($dataImagen);
+            ###################################################
+            $dirThumb = 'public/images/neopure/thumb/';
+            $serverdirThumb = $dirThumb;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            #insertamos la imagen para obtene
+
+            $filenameThumb = $this->helper->cleanUrl($idInsertDB . '_thumb-' . $name);
+            $filenameThumb = $filenameThumb . '.' . $extension;
+            //$filename				= $file.'.'.substr(sha1(time()),0,6).'.'.$extension;
+
+            $handle = fopen($serverdirThumb . $filenameThumb, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #############
+            #SE REDIMENSIONA LA IMAGEN
+            #############
+            # ruta de la imagen a redimensionar 
+            $imagen = $serverdirThumb . $filenameThumb;
+            # ruta de la imagen final, si se pone el mismo nombre que la imagen, esta se sobreescribe 
+            $imagen_final = $filenameThumb;
+            $ancho = 270;
+            $alto = 203;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdirThumb);
+            $dataImagenThumb = array(
+                'id' => $idInsertDB,
+                'archivo' => $filenameThumb
+            );
+            $response = $this->model->uploadNeoImagenMiniatura($dataImagenThumb);
+            header('Content-type: application/json; charset=utf-8');
+            echo json_encode($response);
+            //echo json_encode(array('result'=>true));
+        }
     }
 
 }

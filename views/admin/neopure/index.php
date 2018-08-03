@@ -122,6 +122,74 @@ if (isset($_SESSION['message'])) {
                 </div>
             </div>
         </div>
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Contenido Multimedia</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <form id="frmAgregarVideoNeo" method="POST">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>ID video YouTube</label>
+                                    <input class="form-control" type="text" id="id_youtube" name="id_youtube" value="" >
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Video</button>
+                        </form>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Agregar Imagen</label> <small>(Puede agregar varias imagenes)</small>
+                            <div class="html5fileupload fileImagenes" data-multiple="true" data-url="<?= URL . $this->idioma ?>/admin/uploadNeoImagen" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo[]" />
+                            </div>
+                        </div>
+                        <script>
+                            $(".html5fileupload.fileImagenes").html5fileupload({
+                                onAfterStartSuccess: function (response) {
+                                    $("#galeriaNeoPure").append(response.content);
+                                }
+                            });
+                        </script>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12" id="galeriaNeoPure">
+                            <?php if (!empty($this->galeria)): ?>
+                                <?php
+                                foreach ($this->galeria as $item):
+                                    $idImg = $item['id'];
+                                    if ($item['estado'] == 1) {
+                                        $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $idImg . '" data-id="' . $idImg . '"><span class="label label-success">Visible</span></a>';
+                                    } else {
+                                        $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $idImg . '" data-id="' . $idImg . '"><span class="label label-danger">Oculta</span></a>';
+                                    }
+                                    ?>
+                                    <div class="col-sm-3" id="multimediaNeoPure<?= $idImg ?>">
+                                        <?php if (!empty($item['img_miniatura'])): ?>
+                                            <img class="img-responsive" src="<?= URL ?>public/images/neopure/thumb/<?= utf8_encode($item['img_miniatura']) ?>" alt="Photo">
+                                        <?php endif; ?>
+                                        <?php if (!empty($item['id_youtube'])): ?>
+                                            <iframe  class="scale-with-grid" width="230" height="172" src="http://www.youtube.com/embed/<?= utf8_encode($item['id_youtube']) ?>?wmode=opaque" allowfullscreen=""></iframe>
+                                        <?php endif; ?>
+                                        <p> <?= $mostrar; ?> | <a class="pointer btnEliminarImgNeo" data-id="<?= $idImg ?>" id="eliminarImg<?= $idImg ?>"><span class="label label-danger">Eliminar</span></a></p>
+                                    </div>
+                                    <!-- /.col -->
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script type="text/javascript">
@@ -142,6 +210,54 @@ if (isset($_SESSION['message'])) {
                 {
                     if (data.type == 'success') {
                         toastr.success(data.content)
+                    }
+                }
+            });
+            e.preventDefault(); // avoid to execute the actual submit of the form.
+        });
+        $(document).on('click', '.btnMostrarImgNeo', function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '<?= URL . $this->idioma; ?>/admin/btnMostrarImgNeo',
+                    type: 'POST',
+                    data: {id: id},
+                    dataType: 'json'
+                }).done(function (data) {
+                    $('#mostrarImg' + data.id).html(data.content);
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on('click', '.btnEliminarImgNeo', function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '<?= URL . $this->idioma; ?>/admin/btnEliminarImgNeo',
+                    type: 'POST',
+                    data: {id: id},
+                    dataType: 'json'
+                }).done(function (data) {
+                    $('#multimediaNeoPure' + data.id).remove();
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on("submit", "#frmAgregarVideoNeo", function (e) {
+            var url = "<?= URL . $this->idioma; ?>/admin/frmAgregarVideoNeo"; // the script where you handle the form input.
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "json",
+                data: $("#frmAgregarVideoNeo").serialize(), // serializes the form's elements.
+                success: function (data)
+                {
+                    if (data.type == 'success') {
+                        toastr.success(data.mensaje);
+                        $("#galeriaNeoPure").append(data.content);
+                        $('#id_youtube').val("");
                     }
                 }
             });

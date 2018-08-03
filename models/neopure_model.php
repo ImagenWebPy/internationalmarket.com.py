@@ -18,4 +18,9 @@ class Neopure_Model extends Model {
         return $sql[0];
     }
 
+    public function galeria() {
+        $sql = $this->db->select("select * from multimedia_neopure where estado = 1");
+        return $sql;
+    }
+
 }

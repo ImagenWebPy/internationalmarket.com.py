@@ -938,6 +938,30 @@ class Admin_Model extends Model {
         return $id;
     }
 
+    public function frmAgregarVideoNeo($datos) {
+        $this->db->insert('multimedia_neopure', array(
+            'id_youtube' => utf8_decode($datos['id_youtube']),
+            'estado' => 1
+        ));
+        $id = $this->db->lastInsertId();
+        $sql = $this->db->select("select * from multimedia_neopure where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-success">Visible</span></a>';
+        } else {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-danger">Oculta</span></a>';
+        }
+        $contenido = '         <div class="col-sm-3" id="multimediaNeoPure' . $id . '">
+                                    <iframe  class="scale-with-grid" width="230" height="172" src="http://www.youtube.com/embed/' . utf8_encode($sql[0]['id_youtube']) . '?wmode=opaque" allowfullscreen=""></iframe>
+                                    <p>' . $mostrar . ' | <a class="pointer btnEliminarImgNeo" data-id="' . $id . '" id="eliminarImg' . $id . '"><span class="label label-danger">Eliminar</span></a></p>
+                                </div>';
+        $datos = array(
+            "type" => 'success',
+            'mensaje' => 'Se ha agregado el video',
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
     public function listadoDTMetas($datos) {
         $columns = array(
             0 => 'id',
@@ -1153,7 +1177,7 @@ class Admin_Model extends Model {
     }
 
     public function uploadImgCertificacion($datos) {
-        $id = 1;
+        $id = $datos['id'];
         $update = array(
             'img_certificacion' => $datos['imagen']
         );
@@ -1161,6 +1185,7 @@ class Admin_Model extends Model {
         $contenido = '<img class="img-responsive" src="' . URL . 'public/images/certificaciones/' . $datos['imagen'] . '">';
         $data = array(
             "result" => true,
+            'id' => $id,
             'content' => $contenido,
         );
         return $data;
@@ -1316,6 +1341,22 @@ class Admin_Model extends Model {
         $dir = 'public/images/slider/';
         if (file_exists($dir . $sql[0]['imagen'])) {
             unlink($dir . $sql[0]['imagen']);
+        }
+    }
+
+    public function unlinkImgCertificacion($id) {
+        $sql = $this->db->select("select img_certificacion from certificaciones where id = $id");
+        $dir = 'public/images/certificaciones/';
+        if (file_exists($dir . $sql[0]['img_certificacion'])) {
+            unlink($dir . $sql[0]['img_certificacion']);
+        }
+    }
+
+    public function unlinkImagenCertificacionHeader($id) {
+        $sql = $this->db->select("select imagen_header from certificaciones where id = $id");
+        $dir = 'public/images/header/';
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
         }
     }
 
@@ -2642,10 +2683,46 @@ class Admin_Model extends Model {
         return $datos;
     }
 
+    public function btnMostrarImgNeo($data) {
+        $id = $data['id'];
+        #obtenemos el estado actual
+        $sql = $this->db->select("select estado from multimedia_neopure where id = $id");
+        $estado = ($sql[0]['estado'] == 1) ? 0 : 1;
+        $update = array(
+            'estado' => $estado
+        );
+        $this->db->update('multimedia_neopure', $update, "id = $id");
+        if ($estado == 1) {
+            $mostrar = '<span class="label label-success">Visible</span>';
+        } else {
+            $mostrar = '<span class="label label-danger">Oculta</span>';
+        }
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id,
+            'content' => $mostrar
+        );
+        return $datos;
+    }
+
     public function btnEliminarImg($data) {
         $id = $data['id'];
         $this->unlinkImagenProducto($id);
         $sth = $this->db->prepare("delete from productos_img where id = :id");
+        $sth->execute(array(
+            ':id' => $id
+        ));
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id
+        );
+        return $datos;
+    }
+
+    public function btnEliminarImgNeo($data) {
+        $id = $data['id'];
+        $this->unlinkImagenProducto($id);
+        $sth = $this->db->prepare("delete from multimedia_neopure where id = :id");
         $sth->execute(array(
             ':id' => $id
         ));
@@ -2772,11 +2849,11 @@ class Admin_Model extends Model {
                 <div class="col-lg-12">
                     <div class="tabs-container">
                         <ul class="nav nav-tabs">
-                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                            <li class="active"><a data-toggle="tab" href="#blog-1"> ES Contenido</a></li>
+                            <li class=""><a data-toggle="tab" href="#blog-2">EN Contenido</a></li>
                         </ul>
                         <div class="tab-content">
-                            <div id="tab-1" class="tab-pane active">
+                            <div id="blog-1" class="tab-pane active">
                                 <div class="panel-body">
                                     <div class="col-md-12">
                                         <div class="form-group">
@@ -2786,7 +2863,7 @@ class Admin_Model extends Model {
                                     </div>
                                 </div>
                             </div>
-                            <div id="tab-2" class="tab-pane">
+                            <div id="blog-2" class="tab-pane">
                                 <div class="panel-body">
                                     <div class="col-md-12">
                                         <div class="form-group">
@@ -3904,6 +3981,51 @@ id = 1;");
     <h3>' . number_format($googleData[0][0], 2, ',', '.') . '</h3>
 </div>';
         return $data;
+    }
+
+    public function insertNeoImagenes() {
+        $this->db->insert('multimedia_neopure', array(
+            'estado' => 1,
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
+    public function uploadNeoImagen($data) {
+        $id = $data['id'];
+        $update = array(
+            'imagen' => $data['archivo']
+        );
+        $this->db->update('multimedia_neopure', $update, "id = $id");
+    }
+
+    public function uploadNeoImagenMiniatura($data) {
+        $id = $data['id'];
+        $update = array(
+            'img_miniatura' => $data['archivo']
+        );
+        $this->db->update('multimedia_neopure', $update, "id = $id");
+        $sql = $this->db->select("select * from multimedia_neopure where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-success">Visible</span></a>';
+        } else {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-danger">Oculta</span></a>';
+        }
+        $contenido = '         <div class="col-sm-3" id="multimediaNeoPure' . $id . '">
+                                    <img class="img-responsive" src="' . URL . 'public/images/neopure/thumb/' . utf8_encode($sql[0]['img_miniatura']) . '" alt="Photo">
+                                    <p>' . $mostrar . ' | <a class="pointer btnEliminarImgNeo" data-id="' . $id . '" id="eliminarImg' . $id . '"><span class="label label-danger">Eliminar</span></a></p>
+                                </div>';
+        $datos = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
+    public function galeria() {
+        $sql = $this->db->select("select * from multimedia_neopure");
+        return $sql;
     }
 
 }

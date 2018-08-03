@@ -16,6 +16,7 @@ class Neopure extends Controller {
         $this->view->description = '';
         $this->view->keywords = '';
 
+        $this->view->galeria = $this->model->galeria();
         $this->view->datoNeo = $this->model->datoNeo($lng);
         $this->view->subHeader = $this->view->datoNeo['header_text'];
         $this->view->Breadcrumbs = $this->helper->Breadcrumbs($this->url);
