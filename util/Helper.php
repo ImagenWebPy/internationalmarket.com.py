@@ -730,13 +730,21 @@ class Helper {
     public function Breadcrumbs($url) {
         $controlador = $url[1];
         $sqlMenuInicio = $this->db->select("select " . $this->idioma . "_texto from menu where controlador = '/'");
-        $sqlControlador = $this->db->select("select controlador, metodo, " . $this->idioma . "_texto from menu where controlador = '$controlador'");
+        if ($controlador != 'pagina') {
+            $sqlControlador = $this->db->select("select controlador, metodo, " . $this->idioma . "_texto from menu where controlador = '$controlador'");
+            $seccion = utf8_encode($sqlControlador[0][$this->idioma . '_texto']);
+        } else {
+            $idPagina = $url[3];
+            $sqlControlador = $this->db->select("select m.controlador, m.metodo, m." . $this->idioma . "_texto from menu m
+                                                LEFT JOIN pagina p on p.id_menu = m.id where p.id = '$idPagina'");
+            $seccion = utf8_encode($sqlControlador[0][$this->idioma . '_texto']);
+        }
         $data = '<div id="Breadcrumbs">
                     <div class="container">
                         <div class="column one">
                             <ul class="breadcrumbs">
                                 <li class="home"><i class="fa fa-home"></i><a href="' . $this->urlInicio($this->idioma) . '">' . utf8_encode($sqlMenuInicio[0][$this->idioma . '_texto']) . '</a><span><i class="fa fa-angle-right"></i></span></li>
-                                <li><a href="#">' . utf8_encode($sqlControlador[0][$this->idioma . '_texto']) . '</a></li>
+                                <li><a href="#">' . $seccion . '</a></li>
                             </ul>
                         </div>
                     </div>
@@ -746,7 +754,7 @@ class Helper {
 
     public function cargarMenu($idioma) {
         $lng = $idioma;
-        $sql = $this->db->select("SELECT id_padre, " . $lng . "_texto, controlador, metodo, funcion from menu where estado = 1 ORDER BY orden ASC");
+        $sql = $this->db->select("SELECT id, id_padre, " . $lng . "_texto, controlador, metodo, funcion from menu where estado = 1 ORDER BY orden ASC");
         $menu = '<ul id="megaUber" class="megaMenu">';
 
         $sqlProductos = $this->db->select("SELECT
@@ -786,7 +794,12 @@ class Helper {
                 if ($item['metodo'] != 'index') {
                     $metodo = $item['metodo'] . '/';
                 }
-                $url = $this->urlInicio($lng) . $controlador . '/' . $metodo;
+                if ($controlador != 'pagina') {
+                    $url = $this->urlInicio($lng) . $controlador . '/' . $metodo;
+                } else {
+                    $sqlPagina = $this->db->select("SELECT id FROM `pagina` where id_menu = " . $item['id']);
+                    $url = $this->urlInicio($lng) . 'pagina/contenido/' . $sqlPagina[0]['id'] . '/' . $this->cleanUrl($item[$lng . '_texto']);
+                }
             }
             $classSubMenu = '';
             switch ($item['controlador']) {
@@ -1038,16 +1051,92 @@ class Helper {
     }
 
     public function getActivePageAdmin($page) {
-        $dashboard = $dashboard = '';
+        $dashboard = $inicio = $aboutus = $products = $blog = $quality = $certificactions = $logistics = $neopure = $listado = $busqueda = $contacto = $menu = $pagina = $redes = $logo = $direccion = $metatags = $usuarios = '';
         switch ($page) {
             case'inicio':
                 $inicio = 'class ="active"';
                 break;
-
+            case'aboutus':
+                $aboutus = 'class ="active"';
+                break;
+            case'products':
+                $products = 'class ="active"';
+                break;
+            case'certifications':
+                $certificactions = 'class ="active"';
+                break;
+            case'logistics':
+                $logistics = 'class ="active"';
+                break;
+            case'quality':
+                $quality = 'class ="active"';
+                break;
+            case'neopure':
+                $neopure = 'class ="active"';
+                break;
+            case'blog':
+                $blog = 'class ="active"';
+                $listado = 'class ="active"';
+                break;
+            case'busquedas':
+                $blog = 'class ="active"';
+                $busqueda = 'class ="active"';
+                break;
+            case'contacto':
+                $contacto = 'class ="active"';
+                break;
+            case'menu':
+                $menu = 'class ="active"';
+                break;
+            case'pagina':
+                $pagina = 'class ="active"';
+                break;
+            case'redes':
+                $redes = 'class ="active"';
+                break;
+            case'logo':
+                $logo = 'class ="active"';
+                break;
+            case'direccion':
+                $direccion = 'class ="active"';
+                break;
+            case'metatags':
+                $metatags = 'class ="active"';
+                break;
+            case'usuarios':
+                $usuarios = 'class ="active"';
+                break;
             default :
                 $dashboard = 'class ="active"';
                 break;
         }
+        $data = array(
+            'type' => 'success',
+            'paginas' => array(
+                'dashboard' => $dashboard,
+                'inicio' => $inicio,
+                'aboutus' => $aboutus,
+                'products' => $products,
+                'certificactions' => $certificactions,
+                'logistics' => $logistics,
+                'quality' => $quality,
+                'neopure' => $neopure,
+                'blog' => array(
+                    'blog' => $blog,
+                    'listado' => $listado,
+                    'busqueda' => $busqueda
+                ),
+                'contacto' => $contacto,
+                'menu' => $menu,
+                'pagina' => $pagina,
+                'redes' => $redes,
+                'logo' => $logo,
+                'direccion' => $direccion,
+                'metatags' => $metatags,
+                'usuarios' => $usuarios,
+            )
+        );
+        return $data;
     }
 
     public function retornarIdioma() {

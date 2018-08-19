@@ -215,6 +215,21 @@ class Admin extends Controller {
             unset($_SESSION['message']);
     }
 
+    public function pagina() {
+        $this->view->helper = $this->helper;
+        $this->view->idioma = $this->idioma;
+        $this->view->title = 'Páginas';
+        $this->view->listadoPaginas = $this->model->listadoPaginas();
+        $this->view->public_css = array("css/plugins/html5fileupload/html5fileupload.css", "css/plugins/iCheck/custom.css", "css/wfmi-style.css", "css/plugins/toastr/toastr.min.css", "css/plugins/summernote/summernote.css", "css/plugins/datapicker/datepicker3.css");
+        $this->view->publicHeader_js = array("js/plugins/html5fileupload/html5fileupload.min.js");
+        $this->view->public_js = array("js/plugins/iCheck/icheck.min.js", "js/plugins/toastr/toastr.min.js", "js/plugins/summernote/summernote.min.js", "js/plugins/datapicker/bootstrap-datepicker.js");
+        $this->view->render('admin/header');
+        $this->view->render('admin/paginas/index');
+        $this->view->render('admin/footer');
+        if (!empty($_SESSION['message']))
+            unset($_SESSION['message']);
+    }
+
     public function neopure() {
         $this->view->helper = $this->helper;
         $this->view->idioma = $this->idioma;
@@ -324,6 +339,18 @@ class Admin extends Controller {
         echo json_encode($data);
     }
 
+    public function frmAgregarMenu() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = array(
+            'es_texto' => (!empty($_POST['es_texto'])) ? $this->helper->cleanInput($_POST['es_texto']) : NULL,
+            'en_texto' => (!empty($_POST['en_texto'])) ? $this->helper->cleanInput($_POST['en_texto']) : NULL,
+            'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0,
+        );
+        $data = $this->model->frmAgregarMenu($datos);
+        echo json_encode($data);
+    }
+
     public function frmAgregarIndexSeccionItem5() {
         header('Content-type: application/json; charset=utf-8');
         $datos = array(
@@ -335,7 +362,7 @@ class Admin extends Controller {
         $data = $this->model->frmAgregarIndexSeccionItem5($datos);
         echo json_encode($data);
     }
-    
+
     public function frmAgregarVideoNeo() {
         header('Content-type: application/json; charset=utf-8');
         $datos = array(
@@ -415,6 +442,12 @@ class Admin extends Controller {
     public function modalAgregarUsuario() {
         header('Content-type: application/json; charset=utf-8');
         $datos = $this->model->modalAgregarUsuario($this->idioma);
+        echo json_encode($datos);
+    }
+
+    public function modalAgregarMenu() {
+        header('Content-type: application/json; charset=utf-8');
+        $datos = $this->model->modalAgregarMenu($this->idioma);
         echo json_encode($datos);
     }
 
@@ -753,6 +786,41 @@ class Admin extends Controller {
         }
     }
 
+    public function uploadImgPaginaHeader() {
+        if (!empty($_POST)) {
+            $idPost = $_POST['data']['id'];
+            $this->model->unlinkImagenNeoPure();
+            $error = false;
+            $absolutedir = dirname(__FILE__);
+            $dir = 'public/images/header/';
+            $serverdir = $dir;
+            $tmp = explode(',', $_POST['file']);
+            $file = base64_decode($tmp[1]);
+            $ext = explode('.', $_POST['filename']);
+            $extension = strtolower(end($ext));
+            $name = $_POST['name'];
+            $filename = $this->helper->cleanUrl($name);
+            $filename = $filename . '.' . $extension;
+            $handle = fopen($serverdir . $filename, 'w');
+            fwrite($handle, $file);
+            fclose($handle);
+            #REDIMENSIONAR
+            $imagen = $serverdir . $filename;
+            $imagen_final = $filename;
+            $ancho = 1400;
+            $alto = 788;
+            $this->helper->redimensionar($imagen, $imagen_final, $ancho, $alto, $serverdir);
+            #############
+            header('Content-type: application/json; charset=utf-8');
+            $data = array(
+                'id' => $idPost,
+                'imagen' => $filename
+            );
+            $response = $this->model->uploadImgPaginaHeader($data);
+            echo json_encode($response);
+        }
+    }
+
     public function uploadImgHeaderCalidad() {
         if (!empty($_POST)) {
             $this->model->unlinkImagenCalidad();
@@ -970,6 +1038,16 @@ class Admin extends Controller {
             'idioma' => $this->idioma
         );
         $datos = $this->model->modalEditarProductos($data);
+        echo $datos;
+    }
+
+    public function modalEditarPaginas() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'idioma' => $this->idioma
+        );
+        $datos = $this->model->modalEditarPaginas($data);
         echo $datos;
     }
 
@@ -1642,7 +1720,7 @@ class Admin extends Controller {
         $datos = $this->model->btnMostrarImg($data);
         echo json_encode($datos);
     }
-    
+
     public function btnMostrarImgNeo() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
@@ -1660,7 +1738,7 @@ class Admin extends Controller {
         $datos = $this->model->btnEliminarImg($data);
         echo json_encode($datos);
     }
-    
+
     public function btnEliminarImgNeo() {
         header('Content-type: application/json; charset=utf-8');
         $data = array(
@@ -1819,6 +1897,19 @@ class Admin extends Controller {
             'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0
         );
         $datos = $this->model->frmEditarProducto($data);
+        echo json_encode($datos);
+    }
+
+    public function frmEditarPagina() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'es_contenido' => (!empty($_POST['es_contenido'])) ? $_POST['es_contenido'] : NULL,
+            'es_header_text' => (!empty($_POST['es_header_text'])) ? $this->helper->cleanInput($_POST['es_header_text']) : NULL,
+            'en_header_text' => (!empty($_POST['en_header_text'])) ? $this->helper->cleanInput($_POST['en_header_text']) : NULL,
+            'en_contenido' => (!empty($_POST['en_contenido'])) ? $_POST['en_contenido'] : NULL,
+        );
+        $datos = $this->model->frmEditarPagina($data);
         echo json_encode($datos);
     }
 

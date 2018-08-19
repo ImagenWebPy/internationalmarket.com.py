@@ -55,7 +55,7 @@ if (isset($_SESSION['message'])) {
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                    <button type="button" class="btn btn-block btn-primary btnAgregarContenido" data-url="modalAgregarRedes">Agregar Contenido</button>
+                    <button type="button" class="btn btn-block btn-primary btnAgregarContenido" data-url="modalAgregarMenu">Agregar Contenido</button>
                 </div>
             </div>
         </div>
@@ -75,6 +75,26 @@ if (isset($_SESSION['message'])) {
                     success: function (data)
                     {
                         $("#menu_" + data.id).html(data.content);
+                        $(".genericModal").modal("toggle");
+                        toastr.success(data.mensaje);
+                    }
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on("submit", "#frmAgregarMenu", function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+                var url = "<?= URL . $this->idioma ?>/admin/frmAgregarMenu"; // the script where you handle the form input.
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: 'json',
+                    data: $("#frmAgregarMenu").serialize(), // serializes the form's elements.
+                    success: function (data)
+                    {
+                        $("#tablaMenu").append(data.content);
                         $(".genericModal").modal("toggle");
                         toastr.success(data.mensaje);
                     }

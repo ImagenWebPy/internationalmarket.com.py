@@ -116,7 +116,7 @@ class Admin_Model extends Model {
                                 <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
                             </div>
                             <div class="btn-submit">
-                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Red Social</button>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Menú</button>
                             </div>
                         </form>
                     </div>
@@ -244,6 +244,55 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function modalAgregarMenu($datos) {
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmAgregarMenu" method="POST">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre Menú ES</label>
+                                    <input type="text" name="es_texto" class="form-control" placeholder="Nombre del Menú en Español" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre Menú EN</label>
+                                    <input type="text" name="en_texto" class="form-control" placeholder="Nombre del Menú en Ingles" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Orden</label>
+                                    <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                            </div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Menú</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Agregar Menú',
+            'content' => $modal
+        );
+        return $data;
+    }
+
     public function frmEditarRedes($datos) {
         $id = $datos['id'];
         $estado = 1;
@@ -319,6 +368,41 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function frmAgregarMenu($datos) {
+        $this->db->insert('menu', array(
+            'es_texto' => utf8_decode($datos['es_texto']),
+            'en_texto' => utf8_decode($datos['en_texto']),
+            'controlador' => 'pagina',
+            'metodo' => 'contenido',
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => (!empty($datos['estado'])) ? $datos['estado'] : 0
+        ));
+        $id = $this->db->lastInsertId();
+        $this->db->insert('pagina', array(
+            'id_menu' => $id
+        ));
+        $sql = $this->db->select("select * from menu where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+        } else {
+            $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+        }
+        $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMenu"><i class="fa fa-edit"></i> Editar </a>';
+        $data = array(
+            'type' => 'success',
+            'content' => '<tr id="menu_' . $id . '">'
+            . '<td>' . $sql[0]['orden'] . '</td>'
+            . '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+            . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
+            . '<td>' . $estado . '</td>'
+            . '<td>' . $btnEditar . '</td>'
+            . '</tr>',
+            'mensaje' => 'Se ha agregado correctamente el menú',
+            'id' => $id
+        );
+        return $data;
+    }
+
     public function frmAgregarIndexSeccionItem5($datos) {
         $this->db->insert('index_seccion5_items', array(
             'es_item' => utf8_decode($datos['es_item']),
@@ -352,6 +436,10 @@ class Admin_Model extends Model {
 //$sql = $this->db->select("SELECT * FROM $tabla WHERE id = $id;");
         $data = '';
         switch ($tabla) {
+            case 'pagina':
+                $sql = $this->db->select("SELECT m.es_texto, m.en_texto, p.id FROM pagina p
+                                        LEFT JOIN menu m on m.id = p.id_menu WHERE p.id = $id;");
+                break;
             case 'usuario':
                 $sql = $this->db->select("SELECT wa.nombre, wa.email, wr.descripcion as rol, wa.estado
                                         FROM usuario wa
@@ -370,6 +458,12 @@ class Admin_Model extends Model {
                 break;
         }
         switch ($seccion) {
+            case 'pagina':
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarPaginas"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
+                        . '<td>' . $btnEditar . '</td>';
+                break;
             case 'certificacion':
                 if ($sql[0]['estado'] == 1) {
                     $estado = '<a class="pointer btnCambiarEstado" data-seccion="certificacion" data-rowid="certificacion_" data-tabla="certificaciones" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
@@ -647,6 +741,12 @@ class Admin_Model extends Model {
 
     public function listadoProductos() {
         $sql = $this->db->select("SELECT * FROM productos ORDER BY orden ASC;");
+        return $sql;
+    }
+
+    public function listadoPaginas() {
+        $sql = $this->db->select("SELECT p.id, m.es_texto, m.en_texto FROM pagina p
+                                LEFT JOIN menu m on m.id = p.id_menu");
         return $sql;
     }
 
@@ -1255,6 +1355,21 @@ class Admin_Model extends Model {
             'imagen_header' => $datos['imagen']
         );
         $this->db->update('productos', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgPaginaHeader($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('pagina', $update, "id = $id");
         $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
         $data = array(
             "result" => true,
@@ -2178,6 +2293,103 @@ class Admin_Model extends Model {
                 </div>";
         $data = array(
             'titulo' => 'Editar Producto',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function modalEditarPaginas($datos) {
+        $id = $datos['id'];
+        $lng = $datos['idioma'];
+        $sql = $this->db->select("SELECT m.es_texto, m.en_texto, p.* FROM pagina p
+                                LEFT JOIN menu m on m.id = p.id_menu where p.id = $id");
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarPagina" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Header Text</label>
+                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="' . utf8_encode($sql[0]['es_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote">' . utf8_encode($sql[0]['es_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Header Text</label>
+                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="' . utf8_encode($sql[0]['en_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote">' . utf8_encode($sql[0]['en_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                        </form>
+                        <hr>
+                        </div>
+                        <div class="col-md-12">
+                            <h3>Imagen de Cabecera</h3>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG, PNG<br>
+                                    -Dimensión: Hasta 1400 x 788<br>
+                                    -Tamaño: 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload filePaginaHeader" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgPaginaHeader" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.filePaginaHeader").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgPaginaHeader" + response.id).html(response.content);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        
+                        <div class="col-md-12" id="imgPaginaHeader' . $id . '">';
+        if (!empty($sql[0]['imagen_header'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/header/' . $sql[0]['imagen_header'] . '">';
+        }
+        $modal .= '     </div>
+                    </div>
+                </div>';
+        $data = array(
+            'titulo' => 'Editar Pagina ' . utf8_encode($sql[0]['es_texto']) . ' | ' . utf8_encode($sql[0]['en_texto']),
             'content' => $modal
         );
         return json_encode($data);
@@ -3741,6 +3953,24 @@ id = 1;");
             'type' => 'success',
             'id' => $id,
             'content' => $this->rowDataTable('productos', 'productos', $id),
+            'mensaje' => 'Se ha actualizado el contenido del producto'
+        );
+        return $data;
+    }
+
+    public function frmEditarPagina($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_contenido' => utf8_decode($datos['en_contenido'])
+        );
+        $this->db->update('pagina', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'id' => $id,
+            'content' => $this->rowDataTable('pagina', 'pagina', $id),
             'mensaje' => 'Se ha actualizado el contenido del producto'
         );
         return $data;
