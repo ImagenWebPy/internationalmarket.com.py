@@ -12,6 +12,7 @@ class Products extends Controller {
         $id = $url[3];
 
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . 'Producto';
         $this->view->description = '';
         $this->view->keywords = '';

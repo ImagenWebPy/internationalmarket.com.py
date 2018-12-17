@@ -11,6 +11,11 @@ class Admin_Model extends Model {
         return $sql;
     }
 
+    public function getMenu() {
+        $sql = $this->db->select("select * from menu order by orden asc");
+        return $sql;
+    }
+
     public function modalEditarRedes($datos) {
         $id = $datos['id'];
         $sql = $this->db->select("SELECT * FROM redes where id = $id");
@@ -76,6 +81,110 @@ class Admin_Model extends Model {
         return json_encode($data);
     }
 
+    public function modalEditarMenu($datos) {
+        $id = $datos['id'];
+        $sql = $this->db->select("SELECT * FROM menu where id = $id");
+        $checked = "";
+        if ($sql[0]['estado'] == 1)
+            $checked = 'checked';
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarMenu" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Es Nombre</label>
+                                    <input type="text" name="es_texto" class="form-control" value="' . utf8_encode($sql[0]['es_texto']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>En Nombre</label>
+                                    <input type="text" name="en_texto" class="form-control" value="' . utf8_encode($sql[0]['en_texto']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Orden</label>
+                                    <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                            </div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Menú</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green"
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Editar Red Social',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function listadoDTBusqueda($datos) {
+        $columns = array(
+            0 => 'id',
+            1 => 'busqueda',
+            2 => 'cantidad',
+            3 => 'fecha',
+            4 => 'ip'
+        );
+        #getting total number records without any search
+        $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog_busquedas");
+        $totalFiltered = $sql[0]['cantidad'];
+        $totalData = $sql[0]['cantidad'];
+
+        $query = "SELECT * FROM blog_busquedas where 1 = 1";
+        $where = "";
+        if (!empty($datos['search']['value'])) {
+            $where .= " AND (busqueda LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR cantidad LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR fecha LIKE '%" . $requestData['search']['value'] . "%' ";
+            $where .= " OR ip LIKE '%" . $requestData['search']['value'] . "%' )";
+            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+            $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog_busquedas where 1 = 1 $where");
+            $totalFiltered = $sql[0]['cantidad'];
+        }
+        $query .= $where;
+        $query .= " ORDER BY " . $columns[$datos['order'][0]['column']] . "   " . $datos['order'][0]['dir'] . "  LIMIT " . $datos['start'] . " ," . $datos['length'] . "   ";
+        $sql = $this->db->select($query);
+        $data = array();
+        foreach ($sql as $row) {  // preparing an array
+            $id = $row["id"];
+            $nestedData = array();
+            $nestedData['DT_RowId'] = 'contacto_' . $id;
+            $nestedData[] = $id;
+            $nestedData[] = utf8_encode($row["busqueda"]);
+            $nestedData[] = number_format($row["cantidad"], 0, ',', '.');
+            $nestedData[] = date('d-m-Y H:i:s', strtotime($row["fecha"]));
+            $nestedData[] = utf8_encode($row["ip"]);
+            $data[] = $nestedData;
+        }
+
+        $json_data = array(
+            "draw" => intval($datos['draw']), // for every request/draw by clientside , they send a number as a parameter, when they recieve a response/data they first check the draw number, so we are sending same number in draw. 
+            "recordsTotal" => intval($totalData), // total number of records
+            "recordsFiltered" => intval($totalFiltered), // total number of records after searching, if there is no searching then totalFiltered = totalData
+            "data" => $data   // total data array
+        );
+
+        return json_encode($json_data);
+    }
+
     public function modalAgregarRedes($datos) {
         $modal = '<div class="box box-primary">
                     <div class="box-header with-border">
@@ -135,6 +244,55 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function modalAgregarMenu($datos) {
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agregar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmAgregarMenu" method="POST">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre Menú ES</label>
+                                    <input type="text" name="es_texto" class="form-control" placeholder="Nombre del Menú en Español" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre Menú EN</label>
+                                    <input type="text" name="en_texto" class="form-control" placeholder="Nombre del Menú en Ingles" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Orden</label>
+                                    <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                            </div>
+                            <div class="btn-submit">
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Menú</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $(".i-checks").iCheck({
+                            checkboxClass: "icheckbox_square-green",
+                            radioClass: "iradio_square-green",
+                        });
+                    });
+                </script>';
+        $data = array(
+            'titulo' => 'Agregar Menú',
+            'content' => $modal
+        );
+        return $data;
+    }
+
     public function frmEditarRedes($datos) {
         $id = $datos['id'];
         $estado = 1;
@@ -153,6 +311,28 @@ class Admin_Model extends Model {
             'type' => 'success',
             'content' => $this->rowDataTable('redes', 'redes', $id),
             'mensaje' => 'Se han editado satisfactoriamente los datos de ' . $datos['descripcion'],
+            'id' => $id
+        );
+        return $data;
+    }
+
+    public function frmEditarMenu($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_texto' => utf8_decode($datos['es_texto']),
+            'en_texto' => utf8_decode($datos['en_texto']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => $estado
+        );
+        $this->db->update('menu', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'content' => $this->rowDataTable('menu', 'menu', $id),
+            'mensaje' => 'Se ha editado satisfactoriamente los datos del menú ',
             'id' => $id
         );
         return $data;
@@ -188,6 +368,41 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function frmAgregarMenu($datos) {
+        $this->db->insert('menu', array(
+            'es_texto' => utf8_decode($datos['es_texto']),
+            'en_texto' => utf8_decode($datos['en_texto']),
+            'controlador' => 'pagina',
+            'metodo' => 'contenido',
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => (!empty($datos['estado'])) ? $datos['estado'] : 0
+        ));
+        $id = $this->db->lastInsertId();
+        $this->db->insert('pagina', array(
+            'id_menu' => $id
+        ));
+        $sql = $this->db->select("select * from menu where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+        } else {
+            $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+        }
+        $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMenu"><i class="fa fa-edit"></i> Editar </a>';
+        $data = array(
+            'type' => 'success',
+            'content' => '<tr id="menu_' . $id . '">'
+            . '<td>' . $sql[0]['orden'] . '</td>'
+            . '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+            . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
+            . '<td>' . $estado . '</td>'
+            . '<td>' . $btnEditar . '</td>'
+            . '</tr>',
+            'mensaje' => 'Se ha agregado correctamente el menú',
+            'id' => $id
+        );
+        return $data;
+    }
+
     public function frmAgregarIndexSeccionItem5($datos) {
         $this->db->insert('index_seccion5_items', array(
             'es_item' => utf8_decode($datos['es_item']),
@@ -218,9 +433,13 @@ class Admin_Model extends Model {
     }
 
     private function rowDataTable($seccion, $tabla, $id) {
-        //$sql = $this->db->select("SELECT * FROM $tabla WHERE id = $id;");
+//$sql = $this->db->select("SELECT * FROM $tabla WHERE id = $id;");
         $data = '';
         switch ($tabla) {
+            case 'pagina':
+                $sql = $this->db->select("SELECT m.es_texto, m.en_texto, p.id FROM pagina p
+                                        LEFT JOIN menu m on m.id = p.id_menu WHERE p.id = $id;");
+                break;
             case 'usuario':
                 $sql = $this->db->select("SELECT wa.nombre, wa.email, wr.descripcion as rol, wa.estado
                                         FROM usuario wa
@@ -239,6 +458,12 @@ class Admin_Model extends Model {
                 break;
         }
         switch ($seccion) {
+            case 'pagina':
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarPaginas"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
+                        . '<td>' . $btnEditar . '</td>';
+                break;
             case 'certificacion':
                 if ($sql[0]['estado'] == 1) {
                     $estado = '<a class="pointer btnCambiarEstado" data-seccion="certificacion" data-rowid="certificacion_" data-tabla="certificaciones" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
@@ -266,6 +491,19 @@ class Admin_Model extends Model {
                         . '<td>' . utf8_encode($sql[0]['en_header_text']) . '</td>'
                         . '<td>' . utf8_encode($sql[0]['es_menu']) . '</td>'
                         . '<td>' . utf8_encode($sql[0]['en_menu']) . '</td>'
+                        . '<td>' . $estado . '</td>'
+                        . '<td>' . $btnEditar . '</td>';
+                break;
+            case 'menu':
+                if ($sql[0]['estado'] == 1) {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="1"><span class="label label-primary">Activo</span></a>';
+                } else {
+                    $estado = '<a class="pointer btnCambiarEstado" data-seccion="menu" data-rowid="menu_" data-tabla="menu" data-campo="estado" data-id="' . $id . '" data-estado="0"><span class="label label-danger">Inactivo</span></a>';
+                }
+                $btnEditar = '<a class="editDTContenido pointer btn-xs" data-id="' . $id . '" data-url="modalEditarMenu"><i class="fa fa-edit"></i> Editar </a>';
+                $data = '<td>' . utf8_encode($sql[0]['orden']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['es_texto']) . '</td>'
+                        . '<td>' . utf8_encode($sql[0]['en_texto']) . '</td>'
                         . '<td>' . $estado . '</td>'
                         . '<td>' . $btnEditar . '</td>';
                 break;
@@ -379,7 +617,7 @@ class Admin_Model extends Model {
         $campo = $datos['campo'];
         $seccion = $datos['seccion'];
         $estado = $datos['estado'];
-        #Actualizamos el estado de acuerdo al valor actual
+#Actualizamos el estado de acuerdo al valor actual
         if ($estado == 1)
             $newEstado = 0;
         else
@@ -503,6 +741,12 @@ class Admin_Model extends Model {
 
     public function listadoProductos() {
         $sql = $this->db->select("SELECT * FROM productos ORDER BY orden ASC;");
+        return $sql;
+    }
+
+    public function listadoPaginas() {
+        $sql = $this->db->select("SELECT p.id, m.es_texto, m.en_texto FROM pagina p
+                                LEFT JOIN menu m on m.id = p.id_menu");
         return $sql;
     }
 
@@ -794,13 +1038,37 @@ class Admin_Model extends Model {
         return $id;
     }
 
+    public function frmAgregarVideoNeo($datos) {
+        $this->db->insert('multimedia_neopure', array(
+            'id_youtube' => utf8_decode($datos['id_youtube']),
+            'estado' => 1
+        ));
+        $id = $this->db->lastInsertId();
+        $sql = $this->db->select("select * from multimedia_neopure where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-success">Visible</span></a>';
+        } else {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-danger">Oculta</span></a>';
+        }
+        $contenido = '         <div class="col-sm-3" id="multimediaNeoPure' . $id . '">
+                                    <iframe  class="scale-with-grid" width="230" height="172" src="http://www.youtube.com/embed/' . utf8_encode($sql[0]['id_youtube']) . '?wmode=opaque" allowfullscreen=""></iframe>
+                                    <p>' . $mostrar . ' | <a class="pointer btnEliminarImgNeo" data-id="' . $id . '" id="eliminarImg' . $id . '"><span class="label label-danger">Eliminar</span></a></p>
+                                </div>';
+        $datos = array(
+            "type" => 'success',
+            'mensaje' => 'Se ha agregado el video',
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
     public function listadoDTMetas($datos) {
         $columns = array(
             0 => 'id',
             1 => 'pagina',
             2 => 'accion'
         );
-        #getting total number records without any search
+#getting total number records without any search
         $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM meta_tags");
         $totalFiltered = $sql[0]['cantidad'];
         $totalData = $sql[0]['cantidad'];
@@ -811,7 +1079,7 @@ class Admin_Model extends Model {
         if (!empty($datos['search']['value'])) {
             $where .= " AND (m.es_texto LIKE '%" . $requestData['search']['value'] . "%' ";
             $where .= " OR m.en_texto LIKE '%" . $requestData['search']['value'] . "%' )";
-            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+#when there is a search parameter then we have to modify total number filtered rows as per search result.
             $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM meta_tags mt 
                                     LEFT JOIN menu m on m.id = mt.id_menu where 1 = 1 $where");
             $totalFiltered = $sql[0]['cantidad'];
@@ -979,6 +1247,21 @@ class Admin_Model extends Model {
         return $data;
     }
 
+    public function uploadImgSlider($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'imagen' => $datos['imagen']
+        );
+        $this->db->update('slider', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/slider/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
     public function uploadImgHeaderNeoPure($datos) {
         $id = 1;
         $update = array(
@@ -994,7 +1277,7 @@ class Admin_Model extends Model {
     }
 
     public function uploadImgCertificacion($datos) {
-        $id = 1;
+        $id = $datos['id'];
         $update = array(
             'img_certificacion' => $datos['imagen']
         );
@@ -1002,6 +1285,7 @@ class Admin_Model extends Model {
         $contenido = '<img class="img-responsive" src="' . URL . 'public/images/certificaciones/' . $datos['imagen'] . '">';
         $data = array(
             "result" => true,
+            'id' => $id,
             'content' => $contenido,
         );
         return $data;
@@ -1064,13 +1348,28 @@ class Admin_Model extends Model {
         );
         return $data;
     }
-    
+
     public function uploadImgProductoHeader($datos) {
         $id = $datos['id'];
         $update = array(
             'imagen_header' => $datos['imagen']
         );
         $this->db->update('productos', $update, "id = $id");
+        $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
+        $data = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido,
+        );
+        return $data;
+    }
+
+    public function uploadImgPaginaHeader($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'imagen_header' => $datos['imagen']
+        );
+        $this->db->update('pagina', $update, "id = $id");
         $contenido = '<img class="img-responsive" src="' . URL . 'public/images/header/' . $datos['imagen'] . '">';
         $data = array(
             "result" => true,
@@ -1139,8 +1438,8 @@ class Admin_Model extends Model {
     public function unlinkLogoCabecera() {
         $logo = $this->helper->getLogos();
         $dir = 'public/images/';
-        if (file_exists($dir . $logo['logo'])) {
-            unlink($dir . $logo['logo']);
+        if (file_exists($dir . $logo)) {
+            unlink($dir . $logo);
         }
     }
 
@@ -1149,6 +1448,40 @@ class Admin_Model extends Model {
         $dir = 'public/images/header/';
         if (file_exists($dir . $sql[0]['imagen_header'])) {
             unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+
+    public function unlinkImagenSlider($id) {
+        $sql = $this->db->select("select imagen from slider where id = $id");
+        $dir = 'public/images/slider/';
+        if (file_exists($dir . $sql[0]['imagen'])) {
+            unlink($dir . $sql[0]['imagen']);
+        }
+    }
+
+    public function unlinkImgCertificacion($id) {
+        $sql = $this->db->select("select img_certificacion from certificaciones where id = $id");
+        $dir = 'public/images/certificaciones/';
+        if (file_exists($dir . $sql[0]['img_certificacion'])) {
+            unlink($dir . $sql[0]['img_certificacion']);
+        }
+    }
+
+    public function unlinkImagenCertificacionHeader($id) {
+        $sql = $this->db->select("select imagen_header from certificaciones where id = $id");
+        $dir = 'public/images/header/';
+        if (file_exists($dir . $sql[0]['imagen_header'])) {
+            unlink($dir . $sql[0]['imagen_header']);
+        }
+    }
+
+    public function unlinkImagenProducto($id) {
+        $sql = $this->db->select("select img, img_miniatura from productos_img where id = $id");
+        $dir = 'public/images/productos/';
+        $dirThumb = 'public/images/productos/thumb/';
+        if ((file_exists($dir . $sql[0]['img'])) && (file_exists($dirThumb . $sql[0]['img_miniatura']))) {
+            unlink($dir . $sql[0]['img']);
+            unlink($dirThumb . $sql[0]['img_miniatura']);
         }
     }
 
@@ -1215,7 +1548,7 @@ class Admin_Model extends Model {
             5 => 'visto',
             6 => 'accion',
         );
-        #getting total number records without any search
+#getting total number records without any search
         $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM frm_contacto");
         $totalFiltered = $sql[0]['cantidad'];
         $totalData = $sql[0]['cantidad'];
@@ -1227,7 +1560,7 @@ class Admin_Model extends Model {
             $where .= " OR email LIKE '%" . $requestData['search']['value'] . "%' ";
             $where .= " OR asunto LIKE '%" . $requestData['search']['value'] . "%' ";
             $where .= " OR fecha LIKE '%" . $requestData['search']['value'] . "%' )";
-            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+#when there is a search parameter then we have to modify total number filtered rows as per search result.
             $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM frm_contacto where 1 = 1 $where");
             $totalFiltered = $sql[0]['cantidad'];
         }
@@ -1323,7 +1656,7 @@ class Admin_Model extends Model {
             4 => 'estado',
             6 => 'accion',
         );
-        #getting total number records without any search
+#getting total number records without any search
         $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog");
         $totalFiltered = $sql[0]['cantidad'];
         $totalData = $sql[0]['cantidad'];
@@ -1333,7 +1666,7 @@ class Admin_Model extends Model {
         if (!empty($datos['search']['value'])) {
             $where .= " AND (titulo LIKE '%" . $requestData['search']['value'] . "%' ";
             $where .= " OR fecha_blog LIKE '%" . $requestData['search']['value'] . "%')";
-            #when there is a search parameter then we have to modify total number filtered rows as per search result.
+#when there is a search parameter then we have to modify total number filtered rows as per search result.
             $sql = $this->db->select("SELECT COUNT(*) as cantidad FROM blog where 1 = 1 $where");
             $totalFiltered = $sql[0]['cantidad'];
         }
@@ -1813,6 +2146,7 @@ class Admin_Model extends Model {
         $id = $datos['id'];
         $lng = $datos['idioma'];
         $sql = $this->db->select("select * from productos where id = $id");
+        $imagenes = $this->db->select("SELECT * FROM productos_img WHERE id_producto = $id;");
         $checked = "";
         if ($sql[0]['estado'] == 1)
             $checked = 'checked';
@@ -1916,7 +2250,138 @@ class Admin_Model extends Model {
                                 });
                             </script>
                         </div>
+                        
                         <div class="col-md-12" id="imgCertificacionHeader' . $id . '">';
+        if (!empty($sql[0]['imagen_header'])) {
+            $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/header/' . $sql[0]['imagen_header'] . '">';
+        }
+        $modal .= '     </div>
+                        <div class="row">
+                           <h3>Imagenes del producto</h3>
+                            <div class="form-group">
+                                <label>Agregar Imagen</label> <small>(Puede agregar varias imagenes)</small>
+                                <div class="html5fileupload fileProductos" data-multiple="true" data-url="' . URL . $lng . '/admin/uploadProductoImagen" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                    <input type="file" name="file_archivo[]" />
+                                </div>
+                            </div>
+                            <script>
+                                $(".html5fileupload.fileProductos").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imagenesProductos" + response.id_producto).append(response.content);
+                                    }
+                                });
+                            </script>
+                        
+                            <div class="col-md-12" id="imagenesProductos' . $id . '">';
+        foreach ($imagenes as $item) {
+            $idImg = $item['id'];
+            if ($item['estado'] == 1) {
+                $mostrar = '    <a class="pointer btnMostrarImg" id="mostrarImg' . $idImg . '" data-id="' . $idImg . '"><span class="label label-success">Visible</span></a>';
+            } else {
+                $mostrar = '    <a class="pointer btnMostrarImg" id="mostrarImg' . $idImg . '" data-id="' . $idImg . '"><span class="label label-danger">Oculta</span></a>';
+            }
+            $modal .= '         <div class="col-sm-3" id="imagenGaleria' . $idImg . '">
+                                    <img class="img-responsive" src="' . URL . 'public/images/productos/thumb/' . utf8_encode($item['img_miniatura']) . '" alt="Photo">
+                                    <p>' . $mostrar . ' | <a class="pointer btnEliminarImg" data-id="' . $idImg . '" id="eliminarImg' . $idImg . '"><span class="label label-danger">Eliminar</span></a></p>
+                                </div>
+                                <!-- /.col -->';
+        }
+        $modal .= "         </div>
+                        </div>
+                    </div>
+                </div>";
+        $data = array(
+            'titulo' => 'Editar Producto',
+            'content' => $modal
+        );
+        return json_encode($data);
+    }
+
+    public function modalEditarPaginas($datos) {
+        $id = $datos['id'];
+        $lng = $datos['idioma'];
+        $sql = $this->db->select("SELECT m.es_texto, m.en_texto, p.* FROM pagina p
+                                LEFT JOIN menu m on m.id = p.id_menu where p.id = $id");
+        $modal = '<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Modificar Datos</h3>
+                    </div>
+                    <div class="row">
+                        <form role="form" id="frmEditarPagina" method="POST">
+                            <input type="hidden" name="id" value="' . $id . '">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="tabs-container">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab-1" class="tab-pane active">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Es Header Text</label>
+                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="' . utf8_encode($sql[0]['es_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="es_contenido" class="summernote">' . utf8_encode($sql[0]['es_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="tab-2" class="tab-pane">
+                                                <div class="panel-body">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>EN Header Text</label>
+                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="' . utf8_encode($sql[0]['en_header_text']) . '">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Contenido</label>
+                                                            <textarea name="en_contenido" class="summernote">' . utf8_encode($sql[0]['en_contenido']) . '</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+                        </form>
+                        <hr>
+                        </div>
+                        <div class="col-md-12">
+                            <h3>Imagen de Cabecera</h3>
+                            <div class="alert alert-info alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                Detalles de la imagen a subir:<br>
+                                    -Formato: JPG, PNG<br>
+                                    -Dimensión: Hasta 1400 x 788<br>
+                                    -Tamaño: 2MB<br>
+                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div class="html5fileupload filePaginaHeader" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgPaginaHeader" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                                <input type="file" name="file_archivo" />
+                            </div>
+                            <script>
+                                $(".html5fileupload.filePaginaHeader").html5fileupload({
+                                    data:{id:' . $id . '},
+                                    onAfterStartSuccess: function(response) {
+                                        $("#imgPaginaHeader" + response.id).html(response.content);
+                                    }
+                                });
+                            </script>
+                        </div>
+                        
+                        <div class="col-md-12" id="imgPaginaHeader' . $id . '">';
         if (!empty($sql[0]['imagen_header'])) {
             $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/header/' . $sql[0]['imagen_header'] . '">';
         }
@@ -1924,7 +2389,7 @@ class Admin_Model extends Model {
                     </div>
                 </div>';
         $data = array(
-            'titulo' => 'Editar Producto',
+            'titulo' => 'Editar Pagina ' . utf8_encode($sql[0]['es_texto']) . ' | ' . utf8_encode($sql[0]['en_texto']),
             'content' => $modal
         );
         return json_encode($data);
@@ -1954,49 +2419,49 @@ class Admin_Model extends Model {
                                     <div class="tabs-container">
                                         <ul class="nav nav-tabs">
                                             <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                                            <li class = ""><a data-toggle = "tab" href = "#tab-2">EN Contenido</a></li>
                                         </ul>
-                                        <div class="tab-content">
-                                            <div id="tab-1" class="tab-pane active">
-                                                <div class="panel-body">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
+                                        <div class = "tab-content">
+                                            <div id = "tab-1" class = "tab-pane active">
+                                                <div class = "panel-body">
+                                                    <div class = "col-md-6">
+                                                        <div class = "form-group">
                                                             <label>Es Header Text</label>
-                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="">
+                                                            <input type = "text" name = "es_header_text" class = "form-control" placeholder = "ES header text" value = "">
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
+                                                    <div class = "col-md-6">
+                                                        <div class = "form-group">
                                                             <label>Es Menu</label>
-                                                            <input type="text" name="es_menu" class="form-control" placeholder="ES Menu" value="">
+                                                            <input type = "text" name = "es_menu" class = "form-control" placeholder = "ES Menu" value = "">
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
+                                                    <div class = "col-md-12">
+                                                        <div class = "form-group">
                                                             <label>Contenido</label>
-                                                            <textarea name="es_contenido" class="summernote"></textarea>
+                                                            <textarea name = "es_contenido" class = "summernote"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div id="tab-2" class="tab-pane">
-                                                <div class="panel-body">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
+                                            <div id = "tab-2" class = "tab-pane">
+                                                <div class = "panel-body">
+                                                    <div class = "col-md-6">
+                                                        <div class = "form-group">
                                                             <label>EN Header Text</label>
-                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="">
+                                                            <input type = "text" name = "en_header_text" class = "form-control" placeholder = "EN header text" value = "">
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
+                                                    <div class = "col-md-6">
+                                                        <div class = "form-group">
                                                             <label>EN Menu</label>
-                                                            <input type="text" name="en_menu" class="form-control" placeholder="EN Menu" value="">
+                                                            <input type = "text" name = "en_menu" class = "form-control" placeholder = "EN Menu" value = "">
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
+                                                    <div class = "col-md-12">
+                                                        <div class = "form-group">
                                                             <label>Contenido</label>
-                                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                                            <textarea name = "en_contenido" class = "summernote"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2004,25 +2469,25 @@ class Admin_Model extends Model {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
+                                <div class = "col-md-12">
                                     <h3>Imagen de Cabecera</h3>
-                                    <div class="alert alert-info alert-dismissable">
-                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                    <div class = "alert alert-info alert-dismissable">
+                                        <button aria-hidden = "true" data-dismiss = "alert" class = "close" type = "button">×</button>
                                         Detalles de la imagen a subir:<br>
-                                            -Formato: JPG, PNG<br>
-                                            -Dimensión: Hasta 1400 x 788<br>
-                                            -Tamaño: 2MB<br>
+                                        -Formato: JPG, PNG<br>
+                                        -Dimensión: Hasta 1400 x 788<br>
+                                        -Tamaño: 2MB<br>
                                         <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
                                     </div>
-                                    <div class="html5fileupload fileLogisticaHeaderAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                        <input type="file" name="file_archivo" />
+                                    <div class = "html5fileupload fileLogisticaHeaderAgregar" data-max-filesize = "2048000" data-form = "true" data-valid-extensions = "JPG,JPEG,jpg,png,jpeg,PNG" style = "width: 100%;">
+                                        <input type = "file" name = "file_archivo" />
                                     </div>
                                     <script>
                                         $(".html5fileupload.fileLogisticaHeaderAgregar").html5fileupload();
                                     </script>
                                 </div>
                             </div>
-                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
+                            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
                         </form>
                     </div>
                 </div>';
@@ -2036,223 +2501,243 @@ class Admin_Model extends Model {
     public function modalAgregarCertificacion($datos) {
         $lng = $datos;
         $modal = '<div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Agregar Datos</h3>
+    <div class="box-header with-border">
+        <h3 class="box-title">Agregar Datos</h3>
+    </div>
+    <div class="row">
+        <form role="form" action="' . URL . $lng . '/admin/frmAgregarCertificacion" method="POST" enctype="multipart/form-data" method="POST">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Orden</label>
+                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
                     </div>
-                    <div class="row">
-                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarCertificacion" method="POST" enctype="multipart/form-data" method="POST">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Orden</label>
-                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="tabs-container">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Es Header Text</label>
+                                            <input type="text" name="es_texto_header" class="form-control" placeholder="ES header text" value="">
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="tabs-container">
-                                        <ul class="nav nav-tabs">
-                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
-                                        </ul>
-                                        <div class="tab-content">
-                                            <div id="tab-1" class="tab-pane active">
-                                                <div class="panel-body">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Es Header Text</label>
-                                                            <input type="text" name="es_texto_header" class="form-control" placeholder="ES header text" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Es Menu</label>
-                                                            <input type="text" name="es_menu" class="form-control" placeholder="ES Menu" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>Contenido</label>
-                                                            <textarea name="es_contenido" class="summernote"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div id="tab-2" class="tab-pane">
-                                                <div class="panel-body">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>EN Header Text</label>
-                                                            <input type="text" name="en_texto_header" class="form-control" placeholder="EN header text" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>EN Menu</label>
-                                                            <input type="text" name="en_menu" class="form-control" placeholder="EN Menu" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>Contenido</label>
-                                                            <textarea name="en_contenido" class="summernote"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Es Menu</label>
+                                            <input type="text" name="es_menu" class="form-control" placeholder="ES Menu" value="">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Contenido</label>
+                                            <textarea name="es_contenido" class="summernote"></textarea>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <h3>Imagen del Certificado</h3>
-                                    <div class="alert alert-info alert-dismissable">
-                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                        Detalles de la imagen a subir:<br>
-                                            -Formato: PNG (Transparente)<br>
-                                            -Dimensión: Hasta 180 x 180px<br>
-                                            -Tamaño: 2MB<br>
-                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div id="tab-2" class="tab-pane">
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>EN Header Text</label>
+                                            <input type="text" name="en_texto_header" class="form-control" placeholder="EN header text" value="">
+                                        </div>
                                     </div>
-                                    <div class="html5fileupload fileCertificadoAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                        <input type="file" name="file_archivo" />
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>EN Menu</label>
+                                            <input type="text" name="en_menu" class="form-control" placeholder="EN Menu" value="">
+                                        </div>
                                     </div>
-                                    <script>
-                                        $(".html5fileupload.fileCertificadoAgregar").html5fileupload();
-                                    </script>
-                                </div>
-                                <div class="col-md-12">
-                                    <h3>Imagen de Cabecera</h3>
-                                    <div class="alert alert-info alert-dismissable">
-                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                        Detalles de la imagen a subir:<br>
-                                            -Formato: JPG, PNG<br>
-                                            -Dimensión: Hasta 1400 x 788<br>
-                                            -Tamaño: 2MB<br>
-                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Contenido</label>
+                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                        </div>
                                     </div>
-                                    <div class="html5fileupload fileCertificadoHeaderAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                        <input type="file" name="file_archivo_header" />
-                                    </div>
-                                    <script>
-                                        $(".html5fileupload.fileCertificadoHeaderAgregar").html5fileupload();
-                                    </script>
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>';
+                </div>
+                <div class="col-md-12">
+                    <h3>Imagen del Certificado</h3>
+                    <div class="alert alert-info alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        Detalles de la imagen a subir:<br>
+                        -Formato: PNG (Transparente)<br>
+                        -Dimensión: Hasta 180 x 180px<br>
+                        -Tamaño: 2MB<br>
+                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                    </div>
+                    <div class="html5fileupload fileCertificadoAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                        <input type="file" name="file_archivo" />
+                    </div>
+                    <script>
+                        $(".html5fileupload.fileCertificadoAgregar").html5fileupload();
+                    </script>
+                </div>
+                <div class="col-md-12">
+                    <h3>Imagen de Cabecera</h3>
+                    <div class="alert alert-info alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        Detalles de la imagen a subir:<br>
+                        -Formato: JPG, PNG<br>
+                        -Dimensión: Hasta 1400 x 788<br>
+                        -Tamaño: 2MB<br>
+                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                    </div>
+                    <div class="html5fileupload fileCertificadoHeaderAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                        <input type="file" name="file_archivo_header" />
+                    </div>
+                    <script>
+                        $(".html5fileupload.fileCertificadoHeaderAgregar").html5fileupload();
+                    </script>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
+            </div>
+        </form>
+    </div>
+</div>';
         $data = array(
             'titulo' => 'Agregar Sección',
             'content' => $modal
         );
         return $data;
     }
-   
+
     public function modalAgregarProducto($datos) {
         $lng = $datos;
         $modal = '<div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Agregar Producto</h3>
+    <div class="box-header with-border">
+        <h3 class="box-title">Agregar Producto</h3>
+    </div>
+    <div class="row">
+        <form role="form" action="' . URL . $lng . '/admin/frmAgregarProducto" method="POST" enctype="multipart/form-data" method="POST">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Orden</label>
+                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
                     </div>
-                    <div class="row">
-                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarProducto" method="POST" enctype="multipart/form-data" method="POST">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Orden</label>
-                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="tabs-container">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Es Header Text</label>
+                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="">
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="tabs-container">
-                                        <ul class="nav nav-tabs">
-                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
-                                        </ul>
-                                        <div class="tab-content">
-                                            <div id="tab-1" class="tab-pane active">
-                                                <div class="panel-body">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Es Header Text</label>
-                                                            <input type="text" name="es_header_text" class="form-control" placeholder="ES header text" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Es Nombre</label>
-                                                            <input type="text" name="es_nombre" class="form-control" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>Contenido</label>
-                                                            <textarea name="es_contenido" class="summernote"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div id="tab-2" class="tab-pane">
-                                                <div class="panel-body">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>EN Header Text</label>
-                                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>EN Nombre</label>
-                                                            <input type="text" name="en_nombre" class="form-control" value="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>Contenido</label>
-                                                            <textarea name="en_contenido" class="summernote"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Es Nombre</label>
+                                            <input type="text" name="es_nombre" class="form-control" value="">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Contenido</label>
+                                            <textarea name="es_contenido" class="summernote"></textarea>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <h3>Imagen Cabecera</h3>
-                                    <div class="alert alert-info alert-dismissable">
-                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                        Detalles de la imagen a subir:<br>
-                                            -Formato: JPG, PNG<br>
-                                            -Dimensión: Hasta 1400 x 788<br>
-                                            -Tamaño: 2MB<br>
-                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                            </div>
+                            <div id="tab-2" class="tab-pane">
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>EN Header Text</label>
+                                            <input type="text" name="en_header_text" class="form-control" placeholder="EN header text" value="">
+                                        </div>
                                     </div>
-                                    <div class="html5fileupload fileProductoHeaderAgregar" data-max-filesize="2048000" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                        <input type="file" name="file_archivo" />
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>EN Nombre</label>
+                                            <input type="text" name="en_nombre" class="form-control" value="">
+                                        </div>
                                     </div>
-                                    <script>
-                                        $(".html5fileupload.fileProductoHeaderAgregar").html5fileupload();
-                                    </script>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Contenido</label>
+                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>';
+                </div>
+                <div class="col-md-12">
+                    <h3>Imagen Cabecera</h3>
+                    <div class="alert alert-info alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        Detalles de la imagen a subir:<br>
+                        -Formato: JPG, PNG<br>
+                        -Dimensión: Hasta 1400 x 788<br>
+                        -Tamaño: 2MB<br>
+                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                    </div>
+                    <div class="html5fileupload fileImgCabecera" data-form="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg" style="width: 100%;">
+                        <input type="file" name="file_archivo" />
+                    </div>
+                    <script>
+                        $(".html5fileupload.fileImgCabecera").html5fileupload();
+                    </script>
+                </div>
+                <div class="col-md-12">
+                    <h3>Imagenes del Producto</h3>
+                    <div class="alert alert-info alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        Detalles de la imagen a subir:<br>
+                        -Formato: JPG, PNG<br>
+                        -Dimensión: Hasta 1180 x 785<br>
+                        -Tamaño: 2MB<br>
+                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                    </div>
+                    <div class="form-group">
+                        <label>Imagenes</label><small>(Puede agregar varias imagenes)</small>
+                        <div class="html5fileupload files" data-form="true" data-multiple="true" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                            <input type="file" name="file_productos[]" />
+                        </div>
+                    </div>
+                    <script>
+                        $(".html5fileupload.files").html5fileupload();
+                    </script>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Contenido</button>
+            </div>
+        </form>
+    </div>
+</div>';
         $data = array(
             'titulo' => 'Agregar Sección',
             'content' => $modal
@@ -2388,6 +2873,78 @@ class Admin_Model extends Model {
         return $datos;
     }
 
+    public function btnMostrarImg($data) {
+        $id = $data['id'];
+        #obtenemos el estado actual
+        $sql = $this->db->select("select estado from productos_img where id = $id");
+        $estado = ($sql[0]['estado'] == 1) ? 0 : 1;
+        $update = array(
+            'estado' => $estado
+        );
+        $this->db->update('productos_img', $update, "id = $id");
+        if ($estado == 1) {
+            $mostrar = '<span class="label label-success">Visible</span>';
+        } else {
+            $mostrar = '<span class="label label-danger">Oculta</span>';
+        }
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id,
+            'content' => $mostrar
+        );
+        return $datos;
+    }
+
+    public function btnMostrarImgNeo($data) {
+        $id = $data['id'];
+        #obtenemos el estado actual
+        $sql = $this->db->select("select estado from multimedia_neopure where id = $id");
+        $estado = ($sql[0]['estado'] == 1) ? 0 : 1;
+        $update = array(
+            'estado' => $estado
+        );
+        $this->db->update('multimedia_neopure', $update, "id = $id");
+        if ($estado == 1) {
+            $mostrar = '<span class="label label-success">Visible</span>';
+        } else {
+            $mostrar = '<span class="label label-danger">Oculta</span>';
+        }
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id,
+            'content' => $mostrar
+        );
+        return $datos;
+    }
+
+    public function btnEliminarImg($data) {
+        $id = $data['id'];
+        $this->unlinkImagenProducto($id);
+        $sth = $this->db->prepare("delete from productos_img where id = :id");
+        $sth->execute(array(
+            ':id' => $id
+        ));
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id
+        );
+        return $datos;
+    }
+
+    public function btnEliminarImgNeo($data) {
+        $id = $data['id'];
+        $this->unlinkImagenProducto($id);
+        $sth = $this->db->prepare("delete from multimedia_neopure where id = :id");
+        $sth->execute(array(
+            ':id' => $id
+        ));
+        $datos = array(
+            "result" => TRUE,
+            'id' => $id
+        );
+        return $datos;
+    }
+
     public function uploadImgBlogHeader($data) {
         $id = $data['id'];
         $update = array(
@@ -2447,133 +3004,133 @@ class Admin_Model extends Model {
 
     public function modalAgregarBlogPost($lng) {
         $modal = '<div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Agregar Contenido al Blog</h3>
+    <div class="box-header with-border">
+        <h3 class="box-title">Agregar Contenido al Blog</h3>
+    </div>
+    <div class="row">
+        <form role="form" action="' . URL . $lng . '/admin/frmAgregarBlogPost" method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>ES Titulo</label>
+                        <input type="text" name="es_titulo" class="form-control" placeholder="Nombre" value="">
                     </div>
-                    <div class="row">
-                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarBlogPost" method="POST" enctype="multipart/form-data">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>ES Titulo</label>
-                                        <input type="text" name="es_titulo" class="form-control" placeholder="Nombre" value="">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>EN Titulo</label>
-                                        <input type="text" name="en_titulo" class="form-control" placeholder="Nombre" value="">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>ES Tags</label>
-                                        <input type="text" name="es_tags" class="form-control" placeholder="ES Tags" value="">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>EN Tags</label>
-                                        <input type="text" name="en_tags" class="form-control" placeholder="EN Tags" value="">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>ID video Youtube</label>
-                                        <input type="text" name="youtube_id" class="form-control" placeholder="ID video Youtube" value="">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group" id="data_1">
-                                            <label class="font-normal">Fecha Publicación</label>
-                                            <div class="input-group date">
-                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="fecha_blog" value="">
-                                            </div>
-                                        </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="tabs-container">
-                                        <ul class="nav nav-tabs">
-                                                <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                                                <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
-                                        </ul>
-                                        <div class="tab-content">
-                                            <div id="tab-1" class="tab-pane active">
-                                                <div class="panel-body">
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>Contenido</label>
-                                                            <textarea name="es_contenido" class="summernote"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div id="tab-2" class="tab-pane">
-                                                <div class="panel-body">
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>Contenido</label>
-                                                            <textarea name="en_contenido" class="summernote"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>EN Titulo</label>
+                        <input type="text" name="en_titulo" class="form-control" placeholder="Nombre" value="">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>ES Tags</label>
+                        <input type="text" name="es_tags" class="form-control" placeholder="ES Tags" value="">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>EN Tags</label>
+                        <input type="text" name="en_tags" class="form-control" placeholder="EN Tags" value="">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>ID video Youtube</label>
+                        <input type="text" name="youtube_id" class="form-control" placeholder="ID video Youtube" value="">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group" id="data_1">
+                        <label class="font-normal">Fecha Publicación</label>
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="fecha_blog" value="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="tabs-container">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#blog-1"> ES Contenido</a></li>
+                            <li class=""><a data-toggle="tab" href="#blog-2">EN Contenido</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="blog-1" class="tab-pane active">
+                                <div class="panel-body">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Contenido</label>
+                                            <textarea name="es_contenido" class="summernote"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <h3>Imagen del Blog</h3>
-                                <div class="alert alert-warning alert-dismissable">
-                                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                    <strong>No subir una imagen para el blog si va a vincular un video de Youtube al contenido, porque la misma no será visible.</strong>
+                            <div id="blog-2" class="tab-pane">
+                                <div class="panel-body">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Contenido</label>
+                                            <textarea name="en_contenido" class="summernote"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="alert alert-info alert-dismissable">
-                                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                    Detalles de la imagen a subir:<br>
-                                        -Formato: JPG,PNG<br>
-                                        -Dimensión: Hasta 1200 x 800px<br>
-                                        -Tamaño: Hasta 2MB<br>
-                                    <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
-                                </div>
-                                <div class="html5fileupload fileAgregarBlog" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                    <input type="file" name="file_archivo" />
-                                </div>
-                                <script>
-                                    $(".html5fileupload.fileAgregarBlog").html5fileupload();
-                                </script>
                             </div>
-                            <div class="col-md-12">
-                                <h3>Imagen de Cabecera</h3>
-                                <div class="alert alert-info alert-dismissable">
-                                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                    Detalles de la imagen a subir:<br>
-                                        -Formato: JPG,PNG<br>
-                                        -Dimensión: Hasta 1400 x 788<br>
-                                        -Tamaño: Hasta 2MB<br>
-                                    <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
-                                </div>
-                                <div class="html5fileupload fileAgregarBlogHeader" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                    <input type="file" name="file_archivo_header" />
-                                </div>
-                                <script>
-                                    $(".html5fileupload.fileAgregarBlogHeader").html5fileupload();
-                                </script>
-                            </div>
-                            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Blog</button>
-                        </form>
+                        </div>
                     </div>
-                </div>';
+                </div>
+            </div>
+            <div class="col-md-12">
+                <h3>Imagen del Blog</h3>
+                <div class="alert alert-warning alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                    <strong>No subir una imagen para el blog si va a vincular un video de Youtube al contenido, porque la misma no será visible.</strong>
+                </div>
+                <div class="alert alert-info alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                    Detalles de la imagen a subir:<br>
+                    -Formato: JPG,PNG<br>
+                    -Dimensión: Hasta 1200 x 800px<br>
+                    -Tamaño: Hasta 2MB<br>
+                    <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                </div>
+                <div class="html5fileupload fileAgregarBlog" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                    <input type="file" name="file_archivo" />
+                </div>
+                <script>
+                    $(".html5fileupload.fileAgregarBlog").html5fileupload();
+                </script>
+            </div>
+            <div class="col-md-12">
+                <h3>Imagen de Cabecera</h3>
+                <div class="alert alert-info alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                    Detalles de la imagen a subir:<br>
+                    -Formato: JPG,PNG<br>
+                    -Dimensión: Hasta 1400 x 788<br>
+                    -Tamaño: Hasta 2MB<br>
+                    <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                </div>
+                <div class="html5fileupload fileAgregarBlogHeader" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                    <input type="file" name="file_archivo_header" />
+                </div>
+                <script>
+                    $(".html5fileupload.fileAgregarBlogHeader").html5fileupload();
+                </script>
+            </div>
+            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Blog</button>
+        </form>
+    </div>
+</div>';
         $data = array(
             'titulo' => 'Agregar Entrada al Blog',
             'content' => $modal
@@ -2599,7 +3156,7 @@ class Admin_Model extends Model {
         );
         $this->db->update('certificaciones', $update, "id = $id");
     }
-    
+
     public function frmAddProductoImg($imagenes) {
         $id = $imagenes['id'];
         $update = array(
@@ -2650,7 +3207,48 @@ class Admin_Model extends Model {
         $id = $this->db->lastInsertId();
         return $id;
     }
-    
+
+    public function insertProductoImagenes($datos) {
+        $this->db->insert('productos_img', array(
+            'id_producto' => utf8_decode($datos),
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
+    public function uploadProductoImagen($data) {
+        $id = $data['id'];
+        $update = array(
+            'img' => $data['archivo']
+        );
+        $this->db->update('productos_img', $update, "id = $id");
+    }
+
+    public function uploadProductoImagenMiniatura($data) {
+        $id = $data['id'];
+        $update = array(
+            'img_miniatura' => $data['archivo']
+        );
+        $this->db->update('productos_img', $update, "id = $id");
+        $sql = $this->db->select("select * from productos_img where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $mostrar = '    <a class="pointer btnMostrarImg" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-success">Visible</span></a>';
+        } else {
+            $mostrar = '    <a class="pointer btnMostrarImg" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-danger">Oculta</span></a>';
+        }
+        $contenido = '         <div class="col-sm-3" id="imagenGaleria' . $id . '">
+                                    <img class="img-responsive" src="' . URL . 'public/images/productos/thumb/' . utf8_encode($sql[0]['img_miniatura']) . '" alt="Photo">
+                                    <p>' . $mostrar . ' | <a class="pointer btnEliminarImg" data-id="' . $id . '" id="eliminarImg' . $id . '"><span class="label label-danger">Eliminar</span></a></p>
+                                </div>';
+        $datos = array(
+            "result" => true,
+            'id' => $id,
+            'id_producto' => $sql[0]['id_producto'],
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
     public function frmAgregarProducto($datos) {
         $this->db->insert('productos', array(
             'es_nombre' => utf8_decode($datos['es_nombre']),
@@ -2683,48 +3281,48 @@ class Admin_Model extends Model {
 
     public function datosNeoPure() {
         $sql = $this->db->select("SELECT
-                                        *
-                                FROM
-                                        neo_pure
-                                WHERE id =1;");
+*
+FROM
+neo_pure
+WHERE id =1;");
         return $sql[0];
     }
 
     public function datosNosotros() {
         $sql = $this->db->select("SELECT
-                                        *
-                                FROM
-                                        nosotros
-                                WHERE id =1;");
+*
+FROM
+nosotros
+WHERE id =1;");
         return $sql[0];
     }
 
     public function datosContacto() {
         $sql = $this->db->select("SELECT
-                                        *
-                                FROM
-                                        contacto
-                                WHERE id =1;");
+*
+FROM
+contacto
+WHERE id =1;");
         return $sql[0];
     }
 
     public function datosCalidad() {
         $sql = $this->db->select("SELECT
-                                        *
-                                FROM
-                                        quality
-                                WHERE
-                                        id = 1;");
+*
+FROM
+quality
+WHERE
+id = 1;");
         return $sql[0];
     }
 
     public function datosBlog() {
         $sql = $this->db->select("SELECT
-                                        *
-                                FROM
-                                        `blog_header`
-                                WHERE
-                                        id = 1;");
+*
+FROM
+`blog_header`
+WHERE
+id = 1;");
         return $sql[0];
     }
 
@@ -2784,227 +3382,227 @@ class Admin_Model extends Model {
 
     public function modalEditarDTSlider($datos) {
         $id = $datos['id'];
+        $lng = $datos['lng'];
         $sql = $this->db->select("select * from slider where id = $id");
         $checked = ($sql[0]['estado'] == 1) ? 'checked' : '';
         $modal = '<div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Modificar Datos del Slider</h3>
+    <div class="box-header with-border">
+        <h3 class="box-title">Modificar Datos del Slider</h3>
+    </div>
+    <div class="row">
+        <form role="form" id="frmEditarSlider" method="POST">
+            <input type="hidden" name="id" value="' . $id . '">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Orden</label>
+                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
                     </div>
-                    <div class="row">
-                        <form role="form" id="frmEditarSlider" method="POST">
-                            <input type="hidden" name="id" value="' . $id . '">
-                            <div class="row">
+                </div>
+                <div class="col-md-6">
+                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Enlace ES</label>
+                        <input type="text" name="es_url" class="form-control" placeholder="Enlace ES" value="' . utf8_encode($sql[0]['es_url']) . '">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Enlace EN</label>
+                        <input type="text" name="en_url" class="form-control" placeholder="Enlace EN" value="' . utf8_encode($sql[0]['en_url']) . '">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="tabs-container">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#slider-1"> ES Contenido</a></li>
+                        <li class=""><a data-toggle="tab" href="#slider-2">EN Contenido</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="slider-1" class="tab-pane active">
+                            <div class="panel-body">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Orden</label>
-                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="' . utf8_encode($sql[0]['orden']) . '">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1" ' . $checked . '> <i></i> Mostrar </label></div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Enlace ES</label>
-                                        <input type="text" name="es_url" class="form-control" placeholder="Enlace ES" value="' . utf8_encode($sql[0]['es_url']) . '">
+                                        <label>Encabezado</label>
+                                        <input type="text" name="es_texto1" class="form-control" value="' . utf8_encode($sql[0]['es_texto1']) . '">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Enlace EN</label>
-                                        <input type="text" name="en_url" class="form-control" placeholder="Enlace EN" value="' . utf8_encode($sql[0]['en_url']) . '">
+                                        <label>Texto Destacado</label>
+                                        <input type="text" name="es_texto2" class="form-control" value="' . utf8_encode($sql[0]['es_texto2']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Botón</label>
+                                        <input type="text" name="es_boton" class="form-control" value="' . utf8_encode($sql[0]['es_boton']) . '">
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="tabs-container">
-                                    <ul class="nav nav-tabs">
-                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
-                                    </ul>
-                                    <div class="tab-content">
-                                        <div id="tab-1" class="tab-pane active">
-                                            <div class="panel-body">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Encabezado</label>
-                                                        <input type="text" name="es_texto1" class="form-control" value="' . utf8_encode($sql[0]['es_texto1']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Destacado</label>
-                                                        <input type="text" name="es_texto2" class="form-control" value="' . utf8_encode($sql[0]['es_texto2']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Botón</label>
-                                                        <input type="text" name="es_boton" class="form-control" value="' . utf8_encode($sql[0]['es_boton']) . '">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="tab-2" class="tab-pane">
-                                            <div class="panel-body">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Encabezado</label>
-                                                        <input type="text" name="en_texto1" class="form-control" value="' . utf8_encode($sql[0]['en_texto1']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Destacado</label>
-                                                        <input type="text" name="en_texto2" class="form-control" value="' . utf8_encode($sql[0]['en_texto2']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Botón</label>
-                                                        <input type="text" name="en_boton" class="form-control" value="' . utf8_encode($sql[0]['en_boton']) . '">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="panel panel-warning">
-                                        <div class="panel-heading">
-                                            <i class="fa fa-warning"></i> Posiciones
-                                        </div>
-                                        <div class="panel-body">
-                                            <p>Solo modificaque los valores en caso de que desee cambiar la posición de los textos y/o botón del slider</p>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición X Encabezado</label>
-                                                        <input type="text" name="data_x_1" class="form-control" value="' . utf8_encode($sql[0]['data_x_1']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición Y Encabezado</label>
-                                                        <input type="text" name="data_y_1" class="form-control" value="' . utf8_encode($sql[0]['data_y_1']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Inicio Encabezado</label>
-                                                        <input type="text" name="data_start_1" class="form-control" value="' . utf8_encode($sql[0]['data_start_1']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Velocidad Encabezado</label>
-                                                        <input type="text" name="data_speed_1" class="form-control" value="' . utf8_encode($sql[0]['data_speed_1']) . '">
-                                                    </div>
-                                                </div>
-                                            </div><!--/row-->
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición X Destacado</label>
-                                                        <input type="text" name="data_x_2" class="form-control" value="' . utf8_encode($sql[0]['data_x_2']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición Y Destacado</label>
-                                                        <input type="text" name="data_y_2" class="form-control" value="' . utf8_encode($sql[0]['data_y_2']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Inicio Destacado</label>
-                                                        <input type="text" name="data_start_2" class="form-control" value="' . utf8_encode($sql[0]['data_start_2']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Velocidad Destacado</label>
-                                                        <input type="text" name="data_speed_2" class="form-control" value="' . utf8_encode($sql[0]['data_speed_2']) . '">
-                                                    </div>
-                                                </div>
-                                            </div><!--/row-->
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición X Botón</label>
-                                                        <input type="text" name="boton_x" class="form-control" value="' . utf8_encode($sql[0]['boton_x']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición Y Botón</label>
-                                                        <input type="text" name="boton_y" class="form-control" value="' . utf8_encode($sql[0]['boton_y']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Inicio Botón</label>
-                                                        <input type="text" name="boton_start" class="form-control" value="' . utf8_encode($sql[0]['boton_start']) . '">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Velocidad Botón</label>
-                                                        <input type="text" name="boton_speed" class="form-control" value="' . utf8_encode($sql[0]['boton_speed']) . '">
-                                                    </div>
-                                                </div>
-                                            </div><!--/row-->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
-                            </div>
-                        </form>
-                        <hr>
-                        <div class="col-md-12">
-                            <h3>Imagen</h3>
-                            <div class="alert alert-info alert-dismissable">
-                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                Detalles de la imagen a subir:<br>
-                                    -Formato: JPG,PNG (La imagen principal tiene que ser PNG transparente)<br>
-                                    -Dimensión: Imagen Normal: 1920 x 1080px, Imagen Principal: 310 x 649px<br>
-                                    -Tamaño: Hasta 2MB<br>
-                                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
-                            </div>
-                            <div class="html5fileupload fileSlider" data-max-filesize="2048000" data-url="' . URL . 'admin/uploadImgSlider" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                <input type="file" name="file_archivo" />
-                            </div>
-                            <script>
-                                $(".html5fileupload.fileSlider").html5fileupload({
-                                    data:{id:' . $id . '},
-                                    onAfterStartSuccess: function(response) {
-                                        $("#imgSlider" + response.id).html(response.content);
-                                        $("#slider_" + response.id).html(response.row);
-                                    }
-                                });
-                            </script>
                         </div>
-                        <div class="col-md-12" id="imgSlider' . $id . '">';
+                        <div id="slider-2" class="tab-pane">
+                            <div class="panel-body">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Encabezado</label>
+                                        <input type="text" name="en_texto1" class="form-control" value="' . utf8_encode($sql[0]['en_texto1']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Destacado</label>
+                                        <input type="text" name="en_texto2" class="form-control" value="' . utf8_encode($sql[0]['en_texto2']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Botón</label>
+                                        <input type="text" name="en_boton" class="form-control" value="' . utf8_encode($sql[0]['en_boton']) . '">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-warning">
+                        <div class="panel-heading">
+                            <i class="fa fa-warning"></i> Posiciones
+                        </div>
+                        <div class="panel-body">
+                            <p>Solo modificaque los valores en caso de que desee cambiar la posición de los textos y/o botón del slider</p>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición X Encabezado</label>
+                                        <input type="text" name="data_x_1" class="form-control" value="' . utf8_encode($sql[0]['data_x_1']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición Y Encabezado</label>
+                                        <input type="text" name="data_y_1" class="form-control" value="' . utf8_encode($sql[0]['data_y_1']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inicio Encabezado</label>
+                                        <input type="text" name="data_start_1" class="form-control" value="' . utf8_encode($sql[0]['data_start_1']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Velocidad Encabezado</label>
+                                        <input type="text" name="data_speed_1" class="form-control" value="' . utf8_encode($sql[0]['data_speed_1']) . '">
+                                    </div>
+                                </div>
+                            </div><!--/row-->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición X Destacado</label>
+                                        <input type="text" name="data_x_2" class="form-control" value="' . utf8_encode($sql[0]['data_x_2']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición Y Destacado</label>
+                                        <input type="text" name="data_y_2" class="form-control" value="' . utf8_encode($sql[0]['data_y_2']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inicio Destacado</label>
+                                        <input type="text" name="data_start_2" class="form-control" value="' . utf8_encode($sql[0]['data_start_2']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Velocidad Destacado</label>
+                                        <input type="text" name="data_speed_2" class="form-control" value="' . utf8_encode($sql[0]['data_speed_2']) . '">
+                                    </div>
+                                </div>
+                            </div><!--/row-->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición X Botón</label>
+                                        <input type="text" name="boton_x" class="form-control" value="' . utf8_encode($sql[0]['boton_x']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición Y Botón</label>
+                                        <input type="text" name="boton_y" class="form-control" value="' . utf8_encode($sql[0]['boton_y']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inicio Botón</label>
+                                        <input type="text" name="boton_start" class="form-control" value="' . utf8_encode($sql[0]['boton_start']) . '">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Velocidad Botón</label>
+                                        <input type="text" name="boton_speed" class="form-control" value="' . utf8_encode($sql[0]['boton_speed']) . '">
+                                    </div>
+                                </div>
+                            </div><!--/row-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <button type="submit" class="btn btn-block btn-primary btn-lg">Editar Contenido</button>
+            </div>
+        </form>
+        <hr>
+        <div class="col-md-12">
+            <h3>Imagen</h3>
+            <div class="alert alert-info alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                Detalles de la imagen a subir:<br>
+                -Formato: JPG,PNG (La imagen principal tiene que ser PNG transparente)<br>
+                -Dimensión: Imagen Normal: 1920 x 1080px, Imagen Principal: 310 x 649px<br>
+                -Tamaño: Hasta 2MB<br>
+                <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+            </div>
+            <div class="html5fileupload fileSlider" data-max-filesize="2048000" data-url="' . URL . $lng . '/admin/uploadImgSlider" data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                <input type="file" name="file_archivo" />
+            </div>
+            <script>
+                $(".html5fileupload.fileSlider").html5fileupload({
+                    data: {id: ' . $id . '},
+                    onAfterStartSuccess: function (response) {
+                        $("#imgSlider" + response.id).html(response.content);
+                    }
+                });
+            </script>
+        </div>
+        <div class="col-md-12" id="imgSlider' . $id . '">';
         if (!empty($sql[0]['imagen'])) {
             $modal .= '     <img class="img-responsive" src="' . URL . 'public/images/slider/' . $sql[0]['imagen'] . '">';
         }
         $modal .= '     </div>
-                    </div>
-                </div>
-                <script>
-                    $(document).ready(function () {
-                        $(".i-checks").iCheck({
-                            checkboxClass: "icheckbox_square-green",
-                            radioClass: "iradio_square-green",
-                        });
-                    });
-                </script>';
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".i-checks").iCheck({
+            checkboxClass: "icheckbox_square-green",
+            radioClass: "iradio_square-green",
+        });
+    });
+</script>';
         $data = array(
             'titulo' => 'Editar Slider',
             'content' => $modal
@@ -3054,211 +3652,211 @@ class Admin_Model extends Model {
 
     public function modalAgregarSlider($lng) {
         $modal = '<div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Agregar Slider</h3>
-                    </div>
-                    <div class="row">
-                        <form role="form" action="' . URL . $lng . '/admin/frmAgregarSlider" method="POST" enctype="multipart/form-data">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Orden</label>
-                                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Enlace ES</label>
-                                        <input type="text" name="es_url" class="form-control" placeholder="Enlace" value="">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Enlace EN</label>
-                                        <input type="text" name="en_url" class="form-control" placeholder="Enlace" value="">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="tabs-container">
-                                    <ul class="nav nav-tabs">
-                                            <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
-                                            <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
-                                    </ul>
-                                    <div class="tab-content">
-                                        <div id="tab-1" class="tab-pane active">
-                                            <div class="panel-body">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Encabezado</label>
-                                                        <input type="text" name="es_texto1" class="form-control" value="">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Destacado</label>
-                                                        <input type="text" name="es_texto2" class="form-control" value="">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Botón</label>
-                                                        <input type="text" name="es_boton" class="form-control" value="">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="tab-2" class="tab-pane">
-                                            <div class="panel-body">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Encabezado</label>
-                                                        <input type="text" name="en_texto1" class="form-control" value="">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Destacado</label>
-                                                        <input type="text" name="en_texto2" class="form-control" value="">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Texto Botón</label>
-                                                        <input type="text" name="en_boton" class="form-control" value="">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="panel panel-warning">
-                                        <div class="panel-heading">
-                                            <i class="fa fa-warning"></i> Posiciones
-                                        </div>
-                                        <div class="panel-body">
-                                            <p>Solo modificaque los valores en caso de que desee cambiar la posición de los textos y/o botón del slider</p>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición X Encabezado</label>
-                                                        <input type="text" name="data_x_1" class="form-control" value="63">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición Y Encabezado</label>
-                                                        <input type="text" name="data_y_1" class="form-control" value="228">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Inicio Encabezado</label>
-                                                        <input type="text" name="data_start_1" class="form-control" value="500">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Velocidad Encabezado</label>
-                                                        <input type="text" name="data_speed_1" class="form-control" value="900">
-                                                    </div>
-                                                </div>
-                                            </div><!--/row-->
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición X Destacado</label>
-                                                        <input type="text" name="data_x_2" class="form-control" value="76">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición Y Destacado</label>
-                                                        <input type="text" name="data_y_2" class="form-control" value="169">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Inicio Destacado</label>
-                                                        <input type="text" name="data_start_2" class="form-control" value="800">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Velocidad Destacado</label>
-                                                        <input type="text" name="data_speed_2" class="form-control" value="1000">
-                                                    </div>
-                                                </div>
-                                            </div><!--/row-->
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición X Botón</label>
-                                                        <input type="text" name="boton_x" class="form-control" value="240">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Posición Y Botón</label>
-                                                        <input type="text" name="boton_y" class="form-control" value="286">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Inicio Botón</label>
-                                                        <input type="text" name="boton_start" class="form-control" value="1100">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Velocidad Botón</label>
-                                                        <input type="text" name="boton_speed" class="form-control" value="1000">
-                                                    </div>
-                                                </div>
-                                            </div><!--/row-->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h3>Imagen</h3>
-                                    <div class="alert alert-info alert-dismissable">
-                                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                                        Detalles de la imagen a subir:<br>
-                                            -Formato: JPG,PNG<br>
-                                            -Dimensión: Imagen Normal: 1920 x 755<br>
-                                            -Tamaño: Hasta 2MB<br>
-                                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
-                                    </div>
-                                    <div class="html5fileupload fileAgregarSlider" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
-                                        <input type="file" name="file_archivo" />
-                                    </div>
-                                    <script>
-                                        $(".html5fileupload.fileAgregarSlider").html5fileupload();
-                                    </script>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Slider</button>
-                        </form>
+    <div class="box-header with-border">
+        <h3 class="box-title">Agregar Slider</h3>
+    </div>
+    <div class="row">
+        <form role="form" action="' . URL . $lng . '/admin/frmAgregarSlider" method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Orden</label>
+                        <input type="text" name="orden" class="form-control" placeholder="Orden" value="">
                     </div>
                 </div>
-                <script>
-                    $(document).ready(function () {
-                        $(".i-checks").iCheck({
-                            checkboxClass: "icheckbox_square-green",
-                            radioClass: "iradio_square-green",
-                        });
-                    });
-                </script>';
+                <div class="col-md-6">
+                    <div class="i-checks"><label> <input type="checkbox" name="estado" value="1"> <i></i> Mostrar </label></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Enlace ES</label>
+                        <input type="text" name="es_url" class="form-control" placeholder="Enlace" value="">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Enlace EN</label>
+                        <input type="text" name="en_url" class="form-control" placeholder="Enlace" value="">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="tabs-container">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#tab-1"> ES Contenido</a></li>
+                        <li class=""><a data-toggle="tab" href="#tab-2">EN Contenido</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="tab-1" class="tab-pane active">
+                            <div class="panel-body">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Encabezado</label>
+                                        <input type="text" name="es_texto1" class="form-control" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Destacado</label>
+                                        <input type="text" name="es_texto2" class="form-control" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Botón</label>
+                                        <input type="text" name="es_boton" class="form-control" value="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-2" class="tab-pane">
+                            <div class="panel-body">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Encabezado</label>
+                                        <input type="text" name="en_texto1" class="form-control" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Destacado</label>
+                                        <input type="text" name="en_texto2" class="form-control" value="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Texto Botón</label>
+                                        <input type="text" name="en_boton" class="form-control" value="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-warning">
+                        <div class="panel-heading">
+                            <i class="fa fa-warning"></i> Posiciones
+                        </div>
+                        <div class="panel-body">
+                            <p>Solo modificaque los valores en caso de que desee cambiar la posición de los textos y/o botón del slider</p>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición X Encabezado</label>
+                                        <input type="text" name="data_x_1" class="form-control" value="63">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición Y Encabezado</label>
+                                        <input type="text" name="data_y_1" class="form-control" value="228">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inicio Encabezado</label>
+                                        <input type="text" name="data_start_1" class="form-control" value="500">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Velocidad Encabezado</label>
+                                        <input type="text" name="data_speed_1" class="form-control" value="900">
+                                    </div>
+                                </div>
+                            </div><!--/row-->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición X Destacado</label>
+                                        <input type="text" name="data_x_2" class="form-control" value="76">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición Y Destacado</label>
+                                        <input type="text" name="data_y_2" class="form-control" value="169">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inicio Destacado</label>
+                                        <input type="text" name="data_start_2" class="form-control" value="800">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Velocidad Destacado</label>
+                                        <input type="text" name="data_speed_2" class="form-control" value="1000">
+                                    </div>
+                                </div>
+                            </div><!--/row-->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición X Botón</label>
+                                        <input type="text" name="boton_x" class="form-control" value="240">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Posición Y Botón</label>
+                                        <input type="text" name="boton_y" class="form-control" value="286">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inicio Botón</label>
+                                        <input type="text" name="boton_start" class="form-control" value="1100">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Velocidad Botón</label>
+                                        <input type="text" name="boton_speed" class="form-control" value="1000">
+                                    </div>
+                                </div>
+                            </div><!--/row-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Imagen</h3>
+                    <div class="alert alert-info alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        Detalles de la imagen a subir:<br>
+                        -Formato: JPG,PNG<br>
+                        -Dimensión: Imagen Normal: 1920 x 755<br>
+                        -Tamaño: Hasta 2MB<br>
+                        <strong>Obs.: Las imagenes serán redimensionadas automaticamente a la dimensión especificada y se reducirá la calidad de la misma.</strong>
+                    </div>
+                    <div class="html5fileupload fileAgregarSlider" data-form="true" data-max-filesize="2048000"  data-valid-extensions="JPG,JPEG,jpg,png,jpeg,PNG" style="width: 100%;">
+                        <input type="file" name="file_archivo" />
+                    </div>
+                    <script>
+                        $(".html5fileupload.fileAgregarSlider").html5fileupload();
+                    </script>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-block btn-primary btn-lg">Agregar Slider</button>
+        </form>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".i-checks").iCheck({
+            checkboxClass: "icheckbox_square-green",
+            radioClass: "iradio_square-green",
+        });
+    });
+</script>';
         $data = array(
             'titulo' => 'Agregar Slider',
             'content' => $modal
@@ -3355,6 +3953,24 @@ class Admin_Model extends Model {
             'type' => 'success',
             'id' => $id,
             'content' => $this->rowDataTable('productos', 'productos', $id),
+            'mensaje' => 'Se ha actualizado el contenido del producto'
+        );
+        return $data;
+    }
+
+    public function frmEditarPagina($datos) {
+        $id = $datos['id'];
+        $update = array(
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'en_contenido' => utf8_decode($datos['en_contenido'])
+        );
+        $this->db->update('pagina', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'id' => $id,
+            'content' => $this->rowDataTable('pagina', 'pagina', $id),
             'mensaje' => 'Se ha actualizado el contenido del producto'
         );
         return $data;
@@ -3486,6 +4102,160 @@ class Admin_Model extends Model {
             'id' => $id
         );
         return $data;
+    }
+
+    public function insertProductoImagen($imagenes) {
+        $id = $imagenes['id'];
+        $cantImagenes = count($imagenes['imagenes']) - 1;
+        for ($i = 0; $i <= $cantImagenes; $i ++) {
+            $imgPrincipal = ($i == 0) ? 1 : 0;
+            $this->db->insert('productos_img', array(
+                'id_producto' => $id,
+                'img' => $imagenes['imagenes'][$i],
+                'img_miniatura' => $imagenes['thumb'][$i],
+                'estado' => 1
+            ));
+        }
+    }
+
+    public function rptVisitasPaginas($datos) {
+        require './util/Analytics.php';
+        $this->analytics = new Analytics();
+        $googleData = $this->analytics->getPageViews($this->analytics->analytics, $this->analytics->profile, $datos['fechaInicio'], $datos['fechaFin'], $datos['mostrar']);
+        $data = '
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Página</th>
+            <th>Número de Visitas</th>
+        </tr>
+    </thead>
+    <tbody>
+        ';
+        foreach ($googleData as $item) {
+            $data .= '  <tr>
+            <td>' . $item[0] . '</td>
+            <td class="text-center">' . number_format($item[1], 0, ',', '.') . '</td>
+        </tr>';
+        }
+        $data .= '      
+    </tbody>
+</table>';
+        return $data;
+    }
+
+    public function rptCantidadVisitasDia($datos) {
+        require './util/Analytics.php';
+        $this->analytics = new Analytics();
+        $googleData = $this->analytics->getCantidadVisitasDia($this->analytics->analytics, $this->analytics->profile, $datos['fechaInicio'], $datos['fechaFin']);
+        $data = '<div id="morris-one-line-chart"></div>
+<script type="">
+    $(function() {
+    var months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct", "Nov", "Dic"];
+    Morris.Line({
+    element: "morris-one-line-chart",
+    data: [';
+        foreach ($googleData as $item) {
+            $data .= '                  { day: "' . date('Y-m-d H:i:s', strtotime($item[0])) . '", value: ' . $item[1] . ' },';
+        }
+        $data .= '                  ],
+    xkey: "day",
+    xlabels: "day",
+    xLabelFormat: function (x) {
+    var d = new Date(x.label.slice(0, 10) + "T" + x.label.slice(11, x.label.length));
+    return d.getDate() + \' \' + months[d.getMonth()];
+    },
+    ykeys: ["value"],
+    labels: ["Cantidad"],
+    pointSize: 2,
+    hideHover: "auto",
+    lineColors: ["rgb(0, 188, 212)"],
+    xLabelAngle: 50,
+    behaveLikeLine: true,
+    parseTime: false
+    });
+    });
+</script>';
+        return $data;
+    }
+
+    public function rptUsuarios($datos) {
+        require './util/Analytics.php';
+        $this->analytics = new Analytics();
+        $googleData = $this->analytics->getUsuarios($this->analytics->analytics, $this->analytics->profile, $datos['fechaInicio'], $datos['fechaFin']);
+        $data = array(
+            'usuarios' => '<h3>' . number_format($googleData[0][0], 0, ',', '.') . '</h3>',
+            'usuariosNuevos' => '<h3>' . number_format($googleData[0][1], 0, ',', '.') . '</h3>',
+            'sesiones' => '<h3>' . number_format($googleData[0][2], 0, ',', '.') . '</h3>',
+        );
+        return $data;
+    }
+
+    public function rptDispositivos($datos) {
+        require './util/Analytics.php';
+        $this->analytics = new Analytics();
+        $googleData = $this->analytics->getDispositivos($this->analytics->analytics, $this->analytics->profile, $datos['fechaInicio'], $datos['fechaFin']);
+        $data = '<div class="row">
+    <div class="col-xs-4"><h3><i class="fa fa-desktop" aria-hidden="true"></i> ' . number_format($googleData[0][1], 0, ',', '.') . '</h3></div>
+    <div class="col-xs-4"><h3><i class="fa fa-mobile" aria-hidden="true"></i> ' . number_format($googleData[1][1], 0, ',', '.') . '</h3></div>
+    <div class="col-xs-4"><h3><i class="fa fa-tablet" aria-hidden="true"></i> ' . number_format($googleData[2][1], 0, ',', '.') . '</h3></div>
+</div>';
+        return $data;
+    }
+
+    public function rptPaginasSesion($datos) {
+        require './util/Analytics.php';
+        $this->analytics = new Analytics();
+        $googleData = $this->analytics->getPaginasSesion($this->analytics->analytics, $this->analytics->profile, $datos['fechaInicio'], $datos['fechaFin']);
+        $data = '<div class="row">
+    <h3>' . number_format($googleData[0][0], 2, ',', '.') . '</h3>
+</div>';
+        return $data;
+    }
+
+    public function insertNeoImagenes() {
+        $this->db->insert('multimedia_neopure', array(
+            'estado' => 1,
+        ));
+        $id = $this->db->lastInsertId();
+        return $id;
+    }
+
+    public function uploadNeoImagen($data) {
+        $id = $data['id'];
+        $update = array(
+            'imagen' => $data['archivo']
+        );
+        $this->db->update('multimedia_neopure', $update, "id = $id");
+    }
+
+    public function uploadNeoImagenMiniatura($data) {
+        $id = $data['id'];
+        $update = array(
+            'img_miniatura' => $data['archivo']
+        );
+        $this->db->update('multimedia_neopure', $update, "id = $id");
+        $sql = $this->db->select("select * from multimedia_neopure where id = $id");
+        if ($sql[0]['estado'] == 1) {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-success">Visible</span></a>';
+        } else {
+            $mostrar = '    <a class="pointer btnMostrarImgNeo" id="mostrarImg' . $id . '" data-id="' . $id . '"><span class="label label-danger">Oculta</span></a>';
+        }
+        $contenido = '         <div class="col-sm-3" id="multimediaNeoPure' . $id . '">
+                                    <img class="img-responsive" src="' . URL . 'public/images/neopure/thumb/' . utf8_encode($sql[0]['img_miniatura']) . '" alt="Photo">
+                                    <p>' . $mostrar . ' | <a class="pointer btnEliminarImgNeo" data-id="' . $id . '" id="eliminarImg' . $id . '"><span class="label label-danger">Eliminar</span></a></p>
+                                </div>';
+        $datos = array(
+            "result" => true,
+            'id' => $id,
+            'content' => $contenido
+        );
+        return $datos;
+    }
+
+    public function galeria() {
+        $sql = $this->db->select("select * from multimedia_neopure");
+        return $sql;
     }
 
 }

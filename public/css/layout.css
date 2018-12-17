@@ -68,7 +68,7 @@ a:hover.next_page { background-position: right bottom; }
 
 #Header .logo { float: left; }
 #Header .logo h1 { line-height: 0; font-size: 0; }
-#Header #logo { display: block; overflow: hidden; width: 40%; padding: 10px 20px }
+#Header #logo { display: block; overflow: hidden; width: 50%; padding: 10px 20px }
 #Header #logo:hover { text-decoration: none; }
 #Header #logo img { vertical-align:middle;}
 

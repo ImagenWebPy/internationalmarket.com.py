@@ -45,7 +45,7 @@ class Contact_Model extends Model {
             $message .= "Asunto: " . $datos['subject'] . chr(10) . chr(13);
             $message .= "Mensaje:" . $datos['comment'] . chr(10) . chr(13);
             $message .= "Enviado el " . date('Y-m-d H:i:s');
-            //$this->helper->sendMail($email, $asunto, $message);
+            $this->helper->sendMail($email, $asunto, $message);
             $sqlMensaje = $this->db->select("SELECT " . $lng . "_mensaje as mensaje FROM mensajes where seccion = 'formulario_mensaje_enviado';");
             $data = array(
                 'type' => 'success',

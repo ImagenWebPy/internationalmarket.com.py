@@ -150,7 +150,36 @@ if (isset($this->js)) {
             }
             e.handled = true;
         });
-
+        $(document).on('click', '.btnMostrarImg', function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '<?= URL . $this->idioma; ?>/admin/btnMostrarImg',
+                    type: 'POST',
+                    data: {id: id},
+                    dataType: 'json'
+                }).done(function (data) {
+                    $('#mostrarImg' + data.id).html(data.content);
+                });
+            }
+            e.handled = true;
+        });
+        $(document).on('click', '.btnEliminarImg', function (e) {
+            if (e.handled !== true) // This will prevent event triggering more then once
+            {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '<?= URL . $this->idioma; ?>/admin/btnEliminarImg',
+                    type: 'POST',
+                    data: {id: id},
+                    dataType: 'json'
+                }).done(function (data) {
+                    $('#imagenGaleria' + data.id).remove();
+                });
+            }
+            e.handled = true;
+        });
     });
 </script>
 </body>

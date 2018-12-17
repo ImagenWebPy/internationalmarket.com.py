@@ -1,4 +1,3 @@
-
 <div id="mfn-rev-slider">
     <div id="rev_slider_3_1_wrapper" class="rev_slider_wrapper fullwidthbanner-container" style="margin:0px auto;padding:px;margin-top:0px;margin-bottom:0px;max-height:480px;">
         <!-- START REVOLUTION SLIDER 4.6.9 fullwidth mode -->
@@ -9,18 +8,24 @@
                         <!-- MAIN IMAGE -->
                         <img src="<?= URL; ?>public/images/slider/<?= utf8_encode($item['imagen']); ?>" alt="<?= utf8_encode($item['imagen']); ?>" data-bgposition="center top" data-bgfit="cover" data-bgrepeat="no-repeat">
                         <!-- LAYERS -->
-                        <!-- LAYER NR. 1 -->
-                        <div class="tp-caption boxed_large_light tp-fade" data-x="<?= $item['data_x_1']; ?>" data-y="<?= $item['data_y_1']; ?>" data-speed="<?= $item['data_speed_1']; ?>" data-start="<?= $item['data_start_1']; ?>" data-easing="easeOutExpo" data-splitin="none" data-splitout="none" data-elementdelay="0" data-endelementdelay="0" data-end="4700" data-endspeed="300" style="z-index: 5; max-width: auto; max-height: auto; white-space: nowrap;">
-                            <?= utf8_encode($item['texto1']); ?>
-                        </div>
-                        <!-- LAYER NR. 2 -->
-                        <div class="tp-caption boxed_medium_light tp-fade" data-x="<?= $item['data_x_2']; ?>" data-y="<?= $item['data_y_2']; ?>" data-speed="<?= $item['data_speed_2']; ?>" data-start="<?= $item['data_start_2']; ?>" data-easing="easeOutExpo" data-splitin="none" data-splitout="none" data-elementdelay="0" data-endelementdelay="0" data-end="4700" data-endspeed="300" style="z-index: 6; max-width: auto; max-height: auto; white-space: nowrap;">
-                            <?= utf8_encode($item['texto2']); ?>
-                        </div>
-                        <!-- LAYER NR. 3 -->
-                        <div class="tp-caption tp-fade" data-x="<?= $item['boton_x']; ?>" data-y="<?= $item['boton_y']; ?>" data-speed="<?= $item['boton_speed']; ?>" data-start="<?= $item['boton_start']; ?>" data-easing="easeOutExpo" data-splitin="none" data-splitout="none" data-elementdelay="0" data-endelementdelay="0" data-end="4700" data-endspeed="300" style="z-index: 7; max-width: auto; max-height: auto; white-space: nowrap;">
-                            <a href='<?= utf8_encode($item['url']); ?>' class='tp-button green small'><?= utf8_encode($item['boton']); ?><i class="icon-hand-up"></i></a>
-                        </div>
+                        <?php if (!empty($item['texto1'])): ?>
+                            <!-- LAYER NR. 1 -->
+                            <div class="tp-caption boxed_large_light tp-fade" data-x="<?= $item['data_x_1']; ?>" data-y="<?= $item['data_y_1']; ?>" data-speed="<?= $item['data_speed_1']; ?>" data-start="<?= $item['data_start_1']; ?>" data-easing="easeOutExpo" data-splitin="none" data-splitout="none" data-elementdelay="0" data-endelementdelay="0" data-end="4700" data-endspeed="300" style="z-index: 5; max-width: auto; max-height: auto; white-space: nowrap;">
+                                <?= utf8_encode($item['texto1']); ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($item['texto2'])): ?>
+                            <!-- LAYER NR. 2 -->
+                            <div class="tp-caption boxed_medium_light tp-fade" data-x="<?= $item['data_x_2']; ?>" data-y="<?= $item['data_y_2']; ?>" data-speed="<?= $item['data_speed_2']; ?>" data-start="<?= $item['data_start_2']; ?>" data-easing="easeOutExpo" data-splitin="none" data-splitout="none" data-elementdelay="0" data-endelementdelay="0" data-end="4700" data-endspeed="300" style="z-index: 6; max-width: auto; max-height: auto; white-space: nowrap;">
+                                <?= utf8_encode($item['texto2']); ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($item['boton'])): ?>
+                            <!-- LAYER NR. 3 -->
+                            <div class="tp-caption tp-fade" data-x="<?= $item['boton_x']; ?>" data-y="<?= $item['boton_y']; ?>" data-speed="<?= $item['boton_speed']; ?>" data-start="<?= $item['boton_start']; ?>" data-easing="easeOutExpo" data-splitin="none" data-splitout="none" data-elementdelay="0" data-endelementdelay="0" data-end="4700" data-endspeed="300" style="z-index: 7; max-width: auto; max-height: auto; white-space: nowrap;">
+                                <a href='<?= utf8_encode($item['url']); ?>' class='tp-button green small'><?= utf8_encode($item['boton']); ?><i class="icon-hand-up"></i></a>
+                            </div>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

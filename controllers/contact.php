@@ -12,6 +12,7 @@ class Contact extends Controller {
 
         $metas = $this->helper->getMetaTags($this->idioma, $this->url);
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . $metas['title'];
         $this->view->description = $metas['description'];
         $this->view->keywords = $metas['keywords'];

@@ -11,10 +11,12 @@ class Neopure extends Controller {
         $lng = $url[0];
 
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . 'Neo Pure';
         $this->view->description = '';
         $this->view->keywords = '';
 
+        $this->view->galeria = $this->model->galeria();
         $this->view->datoNeo = $this->model->datoNeo($lng);
         $this->view->subHeader = $this->view->datoNeo['header_text'];
         $this->view->Breadcrumbs = $this->helper->Breadcrumbs($this->url);

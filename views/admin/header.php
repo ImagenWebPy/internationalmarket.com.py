@@ -1,6 +1,6 @@
 <?php
 $helper = new Helper();
-$pagina = (!empty($helper->getPage()[1])) ? $helper->getPage()[1] : '';
+$pagina = (!empty($helper->getPage()[2])) ? $helper->getPage()[2] : '';
 $paginaActual = $helper->getActivePageAdmin($pagina);
 $rol = $_SESSION['usuarioLogueado']['rol'];
 ?>
@@ -58,38 +58,40 @@ $rol = $_SESSION['usuarioLogueado']['rol'];
                                 <ul class="dropdown-menu animated fadeInRight m-t-xs">
                                     <li><a href="#">Mis Datos</a></li>
                                     <li class="divider"></li>
-                                    <li><a href="<?= URL.$this->idioma ?>/login/salir">Salir</a></li>
+                                    <li><a href="<?= URL . $this->idioma ?>/login/salir">Salir</a></li>
                                 </ul>
                             </div>
                             <div class="logo-element">
                                 IN+
                             </div>
                         </li>
-                        <li <?= $paginaActual['paginas']['dashboard']; ?>><a href="<?= URL.$this->idioma ?>/admin"><i class="fa fa-th-large"></i> <span class="nav-label">Dashboards</span></a></li>
+                        <li <?= $paginaActual['paginas']['dashboard']; ?>><a href="<?= URL . $this->idioma ?>/admin"><i class="fa fa-th-large"></i> <span class="nav-label">Dashboards</span></a></li>
                         <?php if (($rol == 'Administrador') || ($rol == 'Editor')): ?>
-                            <li <?= $paginaActual['paginas']['inicio']; ?>><a href="<?= URL.$this->idioma ?>/admin/inicio"><i class="fa fa-home"></i> <span class="nav-label">Inicio</span></a></li>
-                            <li <?= $paginaActual['paginas']['aboutus']; ?>><a href="<?= URL.$this->idioma ?>/admin/aboutus"><i class="fa fa-building"></i> <span class="nav-label">Sobre Nosotros</span></a></li>
-                            <li <?= $paginaActual['paginas']['products']; ?>><a href="<?= URL.$this->idioma ?>/admin/products"><i class="fa fa-shopping-basket"></i> <span class="nav-label">Productos</span></a></li>
-                            <li <?= $paginaActual['paginas']['certificactions']; ?>><a href="<?= URL.$this->idioma ?>/admin/certifications"><i class="fa fa-certificate"></i> <span class="nav-label">Certificaciones</span></a></li>
-                            <li <?= $paginaActual['paginas']['logistics']; ?>><a href="<?= URL.$this->idioma ?>/admin/logistics"><i class="fa fa-compass"></i> <span class="nav-label">Logistica</span></a></li>
-                            <li <?= $paginaActual['paginas']['quality']; ?>><a href="<?= URL.$this->idioma ?>/admin/quality"><i class="fa fa-trophy"></i> <span class="nav-label">Calidad</span></a></li>
-                            <li <?= $paginaActual['paginas']['neopure']; ?>><a href="<?= URL.$this->idioma ?>/admin/neopure"><i class="fa fa-podcast"></i> <span class="nav-label">Neo Pure</span></a></li>
+                            <li <?= $paginaActual['paginas']['inicio']; ?>><a href="<?= URL . $this->idioma ?>/admin/inicio"><i class="fa fa-home"></i> <span class="nav-label">Inicio</span></a></li>
+                            <li <?= $paginaActual['paginas']['aboutus']; ?>><a href="<?= URL . $this->idioma ?>/admin/aboutus"><i class="fa fa-building"></i> <span class="nav-label">Sobre Nosotros</span></a></li>
+                            <li <?= $paginaActual['paginas']['products']; ?>><a href="<?= URL . $this->idioma ?>/admin/products"><i class="fa fa-shopping-basket"></i> <span class="nav-label">Productos</span></a></li>
+                            <li <?= $paginaActual['paginas']['certificactions']; ?>><a href="<?= URL . $this->idioma ?>/admin/certifications"><i class="fa fa-certificate"></i> <span class="nav-label">Certificaciones</span></a></li>
+                            <li <?= $paginaActual['paginas']['logistics']; ?>><a href="<?= URL . $this->idioma ?>/admin/logistics"><i class="fa fa-compass"></i> <span class="nav-label">Logistica</span></a></li>
+                            <li <?= $paginaActual['paginas']['quality']; ?>><a href="<?= URL . $this->idioma ?>/admin/quality"><i class="fa fa-trophy"></i> <span class="nav-label">Calidad</span></a></li>
+                            <li <?= $paginaActual['paginas']['neopure']; ?>><a href="<?= URL . $this->idioma ?>/admin/neopure"><i class="fa fa-podcast"></i> <span class="nav-label">Neo Pure</span></a></li>
                             <li <?= $paginaActual['paginas']['blog']['blog']; ?>>
                                 <a href="#"><i class="fa fa-pencil-square-o"></i> <span class="nav-label">Blog</span><span class="fa arrow"></span></a>
                                 <ul class="nav nav-second-level collapse" style="height: 0px;">
-                                    <li <?= $paginaActual['paginas']['blog']['listado']; ?>><a href="<?= URL.$this->idioma ?>/admin/blog">Listado</a></li>
-                                    <li <?= $paginaActual['paginas']['blog']['busqueda']; ?>><a href="<?= URL.$this->idioma ?>/admin/busquedas">Busquedas</a></li>
+                                    <li <?= $paginaActual['paginas']['blog']['listado']; ?>><a href="<?= URL . $this->idioma ?>/admin/blog">Listado</a></li>
+                                    <li <?= $paginaActual['paginas']['blog']['busqueda']; ?>><a href="<?= URL . $this->idioma ?>/admin/busquedas">Busquedas</a></li>
                                 </ul>
                             </li>
-                            <li <?= $paginaActual['paginas']['contacto']; ?>><a href="<?= URL.$this->idioma ?>/admin/contacto"><i class="fa fa-envelope-o"></i> <span class="nav-label">Contacto</span></a></li>
-                            <li <?= $paginaActual['paginas']['redes']; ?>><a href="<?= URL.$this->idioma ?>/admin/redes"><i class="fa fa-share-square-o"></i> <span class="nav-label">Redes</span></a></li>
-                            <li <?= $paginaActual['paginas']['logo']; ?>><a href="<?= URL.$this->idioma ?>/admin/logo"><i class="fa fa-arrows-alt"></i> <span class="nav-label">Logos</span></a></li>
-                            <li <?= $paginaActual['paginas']['direccion']; ?>><a href="<?= URL.$this->idioma ?>/admin/direccion"><i class="fa fa-map-marker"></i> <span class="nav-label">Direcciones</span></a></li>
-                            <li <?= $paginaActual['paginas']['metatags']; ?>><a href="<?= URL.$this->idioma ?>/admin/metatags"><i class="fa fa-tags"></i> <span class="nav-label">Meta-tags</span></a></li>
+                            <li <?= $paginaActual['paginas']['contacto']; ?>><a href="<?= URL . $this->idioma ?>/admin/contacto"><i class="fa fa-envelope-o"></i> <span class="nav-label">Contacto</span></a></li>
+                            <li <?= $paginaActual['paginas']['menu']; ?>><a href="<?= URL . $this->idioma ?>/admin/menu"><i class="fa fa-bars"></i> <span class="nav-label">Menu</span></a></li>
+                            <li <?= $paginaActual['paginas']['pagina']; ?>><a href="<?= URL . $this->idioma ?>/admin/pagina"><i class="fa fa-file-text-o"></i> <span class="nav-label">Páginas</span></a></li>
+                            <li <?= $paginaActual['paginas']['redes']; ?>><a href="<?= URL . $this->idioma ?>/admin/redes"><i class="fa fa-share-square-o"></i> <span class="nav-label">Redes</span></a></li>
+                            <li <?= $paginaActual['paginas']['logo']; ?>><a href="<?= URL . $this->idioma ?>/admin/logo"><i class="fa fa-arrows-alt"></i> <span class="nav-label">Logos</span></a></li>
+                            <li <?= $paginaActual['paginas']['direccion']; ?>><a href="<?= URL . $this->idioma ?>/admin/direccion"><i class="fa fa-map-marker"></i> <span class="nav-label">Direcciones</span></a></li>
+                            <li <?= $paginaActual['paginas']['metatags']; ?>><a href="<?= URL . $this->idioma ?>/admin/metatags"><i class="fa fa-tags"></i> <span class="nav-label">Meta-tags</span></a></li>
                         <?php endif; ?>
                         <?php if ($rol == 'Administrador'): ?>
                             <li <?= $paginaActual['paginas']['usuarios']; ?>>
-                                <a href="<?= URL.$this->idioma ?>/admin/usuarios"><i class="fa fa-users"></i> <span class="nav-label">Usuarios</span></a>
+                                <a href="<?= URL . $this->idioma ?>/admin/usuarios"><i class="fa fa-users"></i> <span class="nav-label">Usuarios</span></a>
                             </li>
                         <?php endif; ?>
                     </ul>
@@ -103,7 +105,7 @@ $rol = $_SESSION['usuarioLogueado']['rol'];
                         </div>
                         <ul class="nav navbar-top-links navbar-right">
                             <li>
-                                <a href="<?= URL.$this->idioma ?>/login/salir">
+                                <a href="<?= URL . $this->idioma ?>/login/salir">
                                     <i class="fa fa-sign-out"></i> Salir
                                 </a>
                             </li>

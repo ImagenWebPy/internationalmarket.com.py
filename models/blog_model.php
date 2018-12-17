@@ -99,4 +99,69 @@ class Blog_Model extends Model {
         return $sql[0];
     }
 
+    public function resultadosBusquedas($datos) {
+        if (!empty($pagina)) {
+            $page = $pagina;
+        } else {
+            $page = 1;
+        }
+        $lng = $datos['lng'];
+        $setLimit = CANT_REG;
+        $pageLimit = ($setLimit * $page) - $setLimit;
+        $busqueda = $datos['busqueda'];
+        $sql = $this->db->select("select id,
+                                        " . $lng . "_titulo as titulo,
+                                        " . $lng . "_contenido as contenido,
+                                        " . $lng . "_tags as tags,
+                                        imagen,
+                                        youtube_id as video,
+                                        imagen_header,
+                                        fecha_blog as fecha
+                                 from blog b 
+                                 where 1 = 1
+                                 AND (" . $lng . "_titulo like '%$busqueda%'
+                                     OR " . $lng . "_contenido like '%$busqueda%')
+                                 ORDER BY b.id desc 
+                                 LIMIT $pageLimit, $setLimit");
+        $condicion = "from blog b 
+                    where 1 = 1
+                    AND (" . $lng . "_titulo like '%$busqueda%'
+                        OR " . $lng . "_contenido like '%$busqueda%')
+                    ORDER BY b.id desc";
+        $listado = array();
+        $campo = $lng . '_titulo';
+        foreach ($sql as $item) {
+            $tags = explode(',', utf8_encode($item['tags']));
+            $tag = '';
+            foreach ($tags as $val) {
+                $tag .= '<a href="#" rel="tag"><span>' . $val . '</span></a>,';
+            }
+            $tag = substr($tag, 0, -1);
+            array_push($listado, array(
+                'id' => $item['id'],
+                'titulo' => utf8_encode($item['titulo']),
+                'contenido' => utf8_encode($item['contenido']),
+                'tags' => $tag,
+                'video' => utf8_encode($item['video']),
+                'imagen' => utf8_encode($item['imagen']),
+                'fecha' => $item['fecha'],
+                'url' => $this->helper->armaUrl($item['id'], 'blog', $campo, $lng)
+            ));
+        }
+        #guardamos el dato buscado
+        $ip = $this->helper->getReal_ip();
+        $cantResultado = count($sql);
+        $this->db->insert('blog_busquedas', array(
+            'busqueda' => utf8_decode($busqueda),
+            'ip' => $ip,
+            'fecha' => date('Y-m-d H:i:s'),
+            'cantidad' => $cantResultado
+        ));
+        $data = array(
+            'listado' => $listado,
+            'paginador' => $this->helper->mostrarPaginador($setLimit, $page, 'blog', 'blog/busqueda', $condicion)
+        );
+        return $data;
+    }
+
 }

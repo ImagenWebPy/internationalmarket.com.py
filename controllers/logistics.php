@@ -12,6 +12,7 @@ class Logistics extends Controller{
         $id = $url[3];
 
         $this->view->idioma = $this->idioma;
+        $this->view->page = $this->page;
         $this->view->title = SITE_TITLE . 'Logistics';
         $this->view->description = '';
         $this->view->keywords = '';

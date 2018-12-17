@@ -1,7 +1,11 @@
+<?php
+$helper = new Helper();
+$logo = $helper->getLogos();
+?>
 <div class="middle-box text-center loginscreen animated fadeInDown">
     <div>
         <div>
-            <img src="<?= URL; ?>public/admin/img/logo.png" alt="Logo">
+            <img src="<?= URL; ?>public/images/<?= $logo; ?>" alt="Logo">
         </div>
         <p>Ingrese su usuario y contraseña para poder acceder al administrador</p>
         <form class="m-t" id="frmLoginAdmin" method="POST">

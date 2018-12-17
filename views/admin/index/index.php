@@ -146,7 +146,7 @@ $rol = $_SESSION['usuarioLogueado']['rol'];
                     var formatDateEnd = moment(fechaFin).format('DD-MM-YYYY');
                     $('#spanfiltroFechaVisitasPagina').html(formatDateStart + ' - ' + formatDateEnd);
                 }
-                $.when(visitasPaginas("<?= URL; ?>", fechaInicio, fechaFin), dispositivos("<?= URL; ?>", fechaInicio, fechaFin), paginasSesion("<?= URL; ?>", fechaInicio, fechaFin), usuarios("<?= URL; ?>", fechaInicio, fechaFin), cantidadVisitasDia("<?= URL; ?>", fechaInicio, fechaFin));
+                $.when(visitasPaginas("<?= URL . $this->idioma . '/'; ?>", fechaInicio, fechaFin), dispositivos("<?= URL. $this->idioma . '/'; ?>", fechaInicio, fechaFin), paginasSesion("<?= URL. $this->idioma . '/'; ?>", fechaInicio, fechaFin), usuarios("<?= URL. $this->idioma . '/'; ?>", fechaInicio, fechaFin), cantidadVisitasDia("<?= URL. $this->idioma . '/'; ?>", fechaInicio, fechaFin));
             });
         });
     </script>

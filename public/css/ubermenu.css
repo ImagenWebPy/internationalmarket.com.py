@@ -569,7 +569,7 @@
 #megaMenu ul.megaMenu li.menu-item.mega-with-sub > span.um-anchoremulator,
 #megaMenu ul.megaMenu li.menu-item.ss-nav-menu-mega > a,
 #megaMenu ul.megaMenu li.menu-item.ss-nav-menu-mega > span.um-anchoremulator {
-  padding-right: 20px;
+  padding-right: 4px;
 }
 /* Add the arrows as pseudo elements */
 #megaMenu ul.megaMenu li.menu-item.ss-nav-menu-reg li.menu-item.megaReg-with-sub > a:after,
@@ -1314,7 +1314,7 @@
 #megaMenu ul.megaMenu > li.menu-item > a, #megaMenu ul.megaMenu > li.menu-item > span.um-anchoremulator {
   font-size:13px;
   color:#333333;
-  padding:12px 5px;
+  padding:12px 4px;
   font-weight:bold;
 }
 #megaMenu.megaMenuHorizontal ul.megaMenu > li.menu-item:first-child > a {

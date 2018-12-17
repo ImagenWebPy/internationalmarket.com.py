@@ -86,7 +86,7 @@ $footer = $helper->footer_content($this->idioma);
 <script type='text/javascript' src='<?= URL; ?>public/js/mfn.menu.js'></script>
 <script type='text/javascript' src='<?= URL; ?>public/js/jquery.plugins.js'></script>
 <script type='text/javascript' src='<?= URL; ?>public/js/scripts.js'></script>
-<script type='text/javascript' src='<?= URL; ?>public/js/twitter.js'></script>
+<!--<script type='text/javascript' src='<?= URL; ?>public/js/twitter.js'></script>-->
 
 
 <script type="text/javascript">
@@ -241,7 +241,6 @@ $footer = $helper->footer_content($this->idioma);
 
         }
     });	/*ready*/
-
 </script>
 
 </body>

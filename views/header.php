@@ -1,13 +1,14 @@
 <?php
 $lngTxt = 'Languages';
-$classLngEng = 'class="font-bold"';
-$classLngEs = '';
+$classLngEng = 'class="font-bold changeLng"';
+$classLngEs = 'class="changeLng"';
 if ($this->idioma == 'es') {
     $lngTxt = 'Idiomas';
-    $classLngEs = 'class="font-bold"';
-    $classLngEng = '';
+    $classLngEs = 'class="font-bold changeLng"';
+    $classLngEng = 'class="changeLng"';
 }
 $helper = new Helper();
+$logo = $helper->getLogos();
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
@@ -63,6 +64,18 @@ $helper = new Helper();
         <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://themes.muffingroup.com/rocco/wp-content/themes/rocco/css/ie8.css" />
         <![endif]-->
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122995300-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+
+            gtag('config', 'UA-122995300-1');
+        </script>
+
     </head>
     <!-- body -->
     <body class="page page-child page-template-default template-slider  sticky-header layout-full-width">
@@ -76,10 +89,16 @@ $helper = new Helper();
                 <div class="container">
                     <div class="column one">
                         <div class="addons">
-                            <form method="get" id="searchform" action="#">
+                            <form method="post" id="searchform" action="<?= URL . $this->idioma; ?>/blog/busqueda">
+                                <input type="hidden" name="url" value="<?= URL; ?>">
+                                <input type="hidden" name="lng" value="<?= $this->idioma; ?>">
                                 <a class="icon" href="#"><i class="fa fa-search"></i></a>
-                                <input type="text" class="field" name="s" id="s" placeholder="Enter your search"/>
-                                <input type="submit" class="submit" value="" style="display:none;"/>
+                                <?php if ($this->idioma == 'en'): ?>
+                                    <input type="text" class="field" name="busqueda" placeholder="Enter your search"/>
+                                <?php else: ?>
+                                    <input type="text" class="field" name="busqueda" placeholder="Ingrese su Busqueda"/>
+                                <?php endif; ?>
+                                <input type="submit" class="submit btnSubmitSearch" value="" style="display:none;"/>
                             </form>
                             <!-- .social -->
                             <?= $helper->cargarRedesSociales(); ?>
@@ -88,8 +107,8 @@ $helper = new Helper();
                                 <div class="language_select">
                                     <span class="arrow"></span>
                                     <ul id="menu-languages" class="">
-                                        <li class="menu-item"><a href="#" <?= $classLngEng; ?>>English</a></li>
-                                        <li class="menu-item"><a href="#" <?= $classLngEs; ?>>Español</a></li>
+                                        <li class="menu-item"><a href="#" <?= $classLngEng; ?> class="changeLng" data-url="<?= URL; ?>" data-lng="en" data-page="<?= $this->page; ?>">English</a></li>
+                                        <li class="menu-item"><a href="#" <?= $classLngEs; ?> class="changeLng" data-url="<?= URL; ?>" data-lng="es" data-page="<?= $this->page; ?>">Español</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -97,7 +116,7 @@ $helper = new Helper();
                         <!-- .logo -->
                         <div class="logo">
                             <h1><a id="logo" href="<?= $helper->urlInicio($this->idioma); ?>" title="International Market">
-                                    <img class="scale-with-grid" src="<?= URL; ?>public/images/logo-short.png" alt="International Market Logo"/>
+                                    <img class="scale-with-grid" src="<?= URL; ?>public/images/<?= $logo; ?>" alt="International Market Logo" style="width: 270px;"/>
                                 </a>
                             </h1>
                         </div>
