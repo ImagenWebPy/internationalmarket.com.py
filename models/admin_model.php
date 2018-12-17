@@ -3957,6 +3957,32 @@ id = 1;");
         );
         return $data;
     }
+    
+    public function frmEditarLogistica($datos) {
+        $id = $datos['id'];
+        $estado = 1;
+        if (empty($datos['estado'])) {
+            $estado = 0;
+        }
+        $update = array(
+            'es_header_text' => utf8_decode($datos['es_header_text']),
+            'en_header_text' => utf8_decode($datos['en_header_text']),
+            'es_contenido' => utf8_decode($datos['es_contenido']),
+            'en_contenido' => utf8_decode($datos['en_contenido']),
+            'es_menu' => utf8_decode($datos['es_menu']),
+            'en_menu' => utf8_decode($datos['en_menu']),
+            'orden' => utf8_decode($datos['orden']),
+            'estado' => $estado
+        );
+        $this->db->update('logistica', $update, "id = $id");
+        $data = array(
+            'type' => 'success',
+            'id' => $id,
+            'content' => $this->rowDataTable('logistica', 'logistica', $id),
+            'mensaje' => 'Se ha actualizado el contenido de la sección'
+        );
+        return $data;
+    }
 
     public function frmEditarPagina($datos) {
         $id = $datos['id'];

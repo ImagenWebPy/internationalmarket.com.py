@@ -1899,6 +1899,23 @@ class Admin extends Controller {
         $datos = $this->model->frmEditarProducto($data);
         echo json_encode($datos);
     }
+    
+    public function frmEditarLogistica() {
+        header('Content-type: application/json; charset=utf-8');
+        $data = array(
+            'id' => $this->helper->cleanInput($_POST['id']),
+            'es_header_text' => (!empty($_POST['es_header_text'])) ? $this->helper->cleanInput($_POST['es_header_text']) : NULL,
+            'es_menu' => (!empty($_POST['es_menu'])) ? $this->helper->cleanInput($_POST['es_menu']) : NULL,
+            'es_contenido' => (!empty($_POST['es_contenido'])) ? $_POST['es_contenido'] : NULL,
+            'en_header_text' => (!empty($_POST['en_header_text'])) ? $this->helper->cleanInput($_POST['en_header_text']) : NULL,
+            'en_menu' => (!empty($_POST['en_menu'])) ? $this->helper->cleanInput($_POST['en_menu']) : NULL,
+            'en_contenido' => (!empty($_POST['en_contenido'])) ? $_POST['en_contenido'] : NULL,
+            'orden' => (!empty($_POST['orden'])) ? $this->helper->cleanInput($_POST['orden']) : NULL,
+            'estado' => (!empty($_POST['estado'])) ? $this->helper->cleanInput($_POST['estado']) : 0
+        );
+        $datos = $this->model->frmEditarLogistica($data);
+        echo json_encode($datos);
+    }
 
     public function frmEditarPagina() {
         header('Content-type: application/json; charset=utf-8');

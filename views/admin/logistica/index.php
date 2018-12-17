@@ -135,5 +135,22 @@
             });
             e.preventDefault(); // avoid to execute the actual submit of the form.
         });
+        $(document).on("submit", "#frmEditarLogistica", function (e) {
+            var url = "<?= URL . $this->idioma ?>/admin/frmEditarLogistica"; // the script where you handle the form input.
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: $("#frmEditarLogistica").serialize(), // serializes the form's elements.
+                success: function (data)
+                {
+                    if (data.type == 'success') {
+                        $('#logistica_' + data.id).html(data.content);
+                        $(".genericModal").modal("toggle");
+                        toastr.success(data.mensaje);
+                    }
+                }
+            });
+            e.preventDefault(); // avoid to execute the actual submit of the form.
+        });
     });
 </script>
