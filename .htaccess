@@ -36,6 +36,7 @@ RewriteRule .* - [F]
 
 #MVC RULES
 RewriteBase /internationalmarket.com.py/
+#RewriteBase /v2/
 #RewriteBase /
 
 

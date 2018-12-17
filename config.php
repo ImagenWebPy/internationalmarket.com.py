@@ -12,9 +12,16 @@ switch ($host) {
     case 'localhost':
         define('URL', 'http://localhost/internationalmarket.com.py/');
         define('DB_USER', 'root');
-//        define('DB_PASS', 'cThoNTJ0cy9tVU5lQ3JnTDgrbXZxdz09');
-        define('DB_PASS', '');
-        define('DB_NAME', 'international_market');
+        define('DB_PASS', 'cThoNTJ0cy9tVU5lQ3JnTDgrbXZxdz09');
+//        define('DB_PASS', '');
+        define('DB_NAME', 'internationalmarket');
+        define('DB_HOST', 'localhost');
+        break;
+    case 'internationalmarket.com.py':
+        define('URL', 'http://internationalmarket.com.py/v2/');
+        define('DB_USER', 'inter_user');
+        define('DB_PASS', 'Y201dXhBWWxNZVpKOXZsNVIyZ1JydDhmc3R3WG1NSExMQTFjZ2NYT3MyMD0=');
+        define('DB_NAME', 'inter_nationalmarket');
         define('DB_HOST', 'localhost');
         break;
 }
